@@ -2,13 +2,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 type BankType = 'telebirr' | 'cbe' | 'boa';
 
 export default function Home() {
   const router = useRouter();
-  const [selectedBank, setSelectedBank] = useState<BankType | null>(null);
+  // Removed unused state 'selectedBank'
 
   const handleBankSelect = (bank: BankType) => {
     setSelectedBank(bank);
@@ -138,3 +137,14 @@ export default function Home() {
     </main>
   );
 }
+// Removed unused state 'selectedBank'
+
+function setSelectedBank(bank: BankType) {
+  console.log(`Selected bank: ${bank}`);
+  setSelectedBankState(bank);
+}
+
+const setSelectedBankState = (bank: BankType) => {
+  setSelectedBank(bank);
+};
+
