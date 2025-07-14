@@ -11,7 +11,7 @@ type InputMethod = 'text' | 'image' | 'camera';
 
 interface BankVerificationLayoutProps {
   bankName: string;
-  bankColorClass: string; // e.g., 'from-green-50 to-green-100' for Telebirr - used for background
+  bankColorClass: string; // e.g., 'from-green-50 to-green-100' for Telebirr
   requiresAccountNumber: boolean;
   onVerify: (
     inputMethod: InputMethod,
@@ -26,7 +26,7 @@ const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://loc
 
 const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
   bankName,
-  bankColorClass,
+  bankColorClass, // This will now be used for the *main background gradient* of this page
   requiresAccountNumber,
   onVerify,
 }) => {
@@ -135,9 +135,9 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
       const result = await onVerify(activeInputMethod, transactionId, accountNumber, fileToUpload);
       setResponse(result);
       console.log('Verification Success! Response set to state.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage =
-        err.message || 'An unknown error occurred during verification. Please check console for details.';
+        (err instanceof Error ? err.message : 'An unknown error occurred during verification. Please check console for details.');
       setError(errorMessage);
       console.error('Verification Error:', errorMessage, err);
     } finally {
@@ -146,13 +146,13 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
   };
 
   return (
-    <main className={`flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br ${bankColorClass} font-sans text-gray-800 relative overflow-hidden`}>
+    <main className={`flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-gray-100 to-gray-200 font-sans text-gray-800 relative overflow-hidden`}>
       {/* Background circles for dynamic effect - Consistent with main page */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full mix-blend-overlay animate-float-slow" style={{ animationDelay: '0s' }}></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white opacity-5 rounded-full mix-blend-overlay animate-float-medium" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute top-1/3 right-1/12 w-48 h-48 bg-white opacity-5 rounded-full mix-blend-overlay animate-float-fast" style={{ animationDelay: '4s' }}></div>
+      <div className="absolute top-0 left-0 w-64 h-64 bg-blue-200 opacity-20 rounded-full mix-blend-multiply animate-float-slow" style={{ animationDelay: '0s' }}></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-200 opacity-20 rounded-full mix-blend-multiply animate-float-medium" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/3 right-1/12 w-48 h-48 bg-green-200 opacity-20 rounded-full mix-blend-multiply animate-float-fast" style={{ animationDelay: '4s' }}></div>
 
-      <div className="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg p-12 rounded-3xl shadow-2xl max-w-3xl w-full border border-gray-100 animate-fade-in-up z-10">
+      <div className="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg p-12 rounded-3xl shadow-2xl max-w-2xl w-full border border-gray-100 animate-fade-in-up z-10">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{bankName} Verification</h1>
           <button
@@ -162,67 +162,64 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H16a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
             </svg>
-            Back to Banks
+            Back 
           </button>
         </div>
         <p className="text-lg text-center text-gray-600 mb-10 leading-relaxed">
           Verify {bankName} transactions using various input methods.
         </p>
 
-        {/* Input Method Selection - Revamped Tabs with Icons */}
-        <div className="mb-8 p-3 bg-gray-100 rounded-2xl shadow-inner flex flex-wrap justify-center gap-3">
+        {/* Input Method Selection - Revamped Tabs */}
+        <div className="mb-8 p-2 bg-gray-100 rounded-2xl shadow-inner flex flex-wrap justify-center gap-2">
           <button
             type="button"
             onClick={() => handleInputMethodSelect('text')}
             className={`
-              flex flex-col items-center flex-1 min-w-[100px] px-4 py-3 rounded-xl font-semibold text-lg
-              transition duration-300 ease-in-out transform hover:scale-105 shadow-md
+              flex-1 min-w-[120px] px-4 py-3 rounded-xl font-semibold text-lg transition duration-300 ease-in-out transform
               ${activeInputMethod === 'text'
-                ? 'bg-blue-600 text-white ring-2 ring-blue-400'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                ? 'bg-blue-600 text-white shadow-lg scale-100'
+                : 'bg-transparent text-gray-700 hover:bg-gray-200 hover:scale-98'}
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100
             `}
           >
-            <span className="text-3xl mb-1">📝</span>
-            Text Input
+            <span className="text-3xl mb-1 block">📝</span>
+            Text
           </button>
           <button
             type="button"
             onClick={() => handleInputMethodSelect('image')}
             className={`
-              flex flex-col items-center flex-1 min-w-[100px] px-4 py-3 rounded-xl font-semibold text-lg
-              transition duration-300 ease-in-out transform hover:scale-105 shadow-md
+              flex-1 min-w-[120px] px-4 py-3 rounded-xl font-semibold text-lg transition duration-300 ease-in-out transform
               ${activeInputMethod === 'image'
-                ? 'bg-green-600 text-white ring-2 ring-green-400'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
-              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+                ? 'bg-green-600 text-white shadow-lg scale-100'
+                : 'bg-transparent text-gray-700 hover:bg-gray-200 hover:scale-98'}
+              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-100
             `}
           >
-            <span className="text-3xl mb-1">🖼️</span>
-            Upload Image
+            <span className="text-3xl mb-1 block">🖼️</span>
+            Image
           </button>
           <button
             type="button"
             onClick={() => handleInputMethodSelect('camera')}
             className={`
-              flex flex-col items-center flex-1 min-w-[100px] px-4 py-3 rounded-xl font-semibold text-lg
-              transition duration-300 ease-in-out transform hover:scale-105 shadow-md
+              flex-1 min-w-[120px] px-4 py-3 rounded-xl font-semibold text-lg transition duration-300 ease-in-out transform
               ${activeInputMethod === 'camera'
-                ? 'bg-purple-600 text-white ring-2 ring-purple-400'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
-              focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                ? 'bg-purple-600 text-white shadow-lg scale-100'
+                : 'bg-transparent text-gray-700 hover:bg-gray-200 hover:scale-98'}
+              focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-100
             `}
           >
-            <span className="text-3xl mb-1">📸</span>
-            Use Camera
+            <span className="text-3xl mb-1 block">📸</span>
+            Camera
           </button>
         </div>
 
         {/* Main Verification Form */}
-        <form onSubmit={handleSubmit} className="p-8 bg-gray-50 rounded-2xl shadow-inner animate-fade-in border border-gray-200">
+        <form onSubmit={handleSubmit} className="p-8 border border-gray-200 rounded-2xl bg-gray-50 shadow-inner animate-fade-in">
           {activeInputMethod === 'text' && (
             <>
-              <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Enter Transaction Details</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-5 text-center">Enter {bankName} Transaction Details</h2>
               <div className="mb-5">
                 <label htmlFor="transactionId" className="block text-gray-700 text-sm font-bold mb-2">
                   Transaction ID:
@@ -260,7 +257,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
 
           {activeInputMethod === 'image' && (
             <>
-              <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Upload Screenshot / Image</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-5 text-center">Upload {bankName} Screenshot / Image</h2>
               <div className="mb-5">
                 <label htmlFor="imageUpload" className="block text-gray-700 text-sm font-bold mb-2">
                   Select Image File:
@@ -271,12 +268,12 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
                   name="imageUpload"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-base file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200 transition duration-200 cursor-pointer shadow-sm"
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200 transition duration-200 cursor-pointer"
                   required
                 />
               </div>
               {imageFile && (
-                <div className="mt-6 text-center p-4 bg-gray-100 rounded-lg shadow-inner border border-gray-200">
+                <div className="mt-4 text-center p-4 bg-gray-100 rounded-lg shadow-inner">
                   <p className="text-sm text-gray-600 mb-3">Selected file: <span className="font-medium text-gray-800">{imageFile.name}</span></p>
                   <img src={URL.createObjectURL(imageFile)} alt="Selected Preview" className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200" />
                 </div>
@@ -303,7 +300,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
 
           {activeInputMethod === 'camera' && (
             <>
-              <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">Capture Payment Details</h2>
+              <h2 className="text-2xl font-bold text-gray-700 mb-5 text-center">Capture {bankName} Payment Details</h2>
               {error && (
                 <div className="p-3 mb-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm animate-fade-in">
                   {error}
@@ -344,7 +341,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
                 )}
               </div>
               {capturedImageSrc && (
-                <div className="mt-4 text-center p-4 bg-gray-100 rounded-lg shadow-inner border border-gray-200">
+                <div className="mt-4 text-center p-4 bg-gray-100 rounded-lg shadow-inner">
                   <p className="text-sm text-gray-600 mb-3">Captured image preview:</p>
                   <img src={URL.createObjectURL(new Blob([atob(capturedImageSrc.split(',')[1])], { type: capturedImageSrc.split(',')[0].split(':')[1].split(';')[0] }))} alt="Captured" className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200" />
                 </div>

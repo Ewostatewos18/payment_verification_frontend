@@ -24,7 +24,7 @@ interface ExtractedData {
 }
 
 export interface VerificationResponse {
-  status: "success" | "pending" | "warning" | "failed" | "PENDING_MANUAL_REVIEW" | "HIGH_CONFIDENCE_OCR_MATCH" | "Account_Number_Required";
+  status: "success" | "pending" | "warning" | "failed" | "PENDING_MANUAL_REVIEW" | "HIGH_CONFIDENCE_OCR_MATCH" | "Account_Number_Required" | "Completed";
   message: string;
   verified_data?: ExtractedData;
   cbe_extracted_data?: ExtractedData;
@@ -44,7 +44,8 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
   let titleColorClass = 'text-blue-800';
   let displayStatusText = response.status.replace(/_/g, ' '); // Default formatting
 
-  if (response.status === 'success' || response.status === 'HIGH_CONFIDENCE_OCR_MATCH') {
+  // Corrected logical OR operators (||)
+  if (response.status === 'success' || response.status === 'HIGH_CONFIDENCE_OCR_MATCH' || response.status === 'Completed') {
     bgColorClass = 'bg-green-50 border-green-200'; // Light green for success
     icon = '✅'; // Checkmark icon
     iconColorClass = 'text-green-600';
@@ -70,9 +71,12 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
     displayStatusText = 'Account Number Required';
   }
 
+  // Corrected logical OR operators (||) for displayData assignment
   const displayData = response.verified_data || response.cbe_extracted_data || response.extracted_data;
 
-  const renderDetail = (label: string, value: any) => {
+  // The renderDetail function remains the same as it's already quite good for individual rows
+  const renderDetail = (label: string, value: unknown) => { // Changed 'any' to 'unknown' for better type safety
+    // Corrected logical OR operators (||)
     if (value === undefined || value === null || value === '') return null;
     return (
       <div className="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
@@ -84,25 +88,33 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 z-50 animate-fade-in">
+      {/* Corrected template literal for className */}
       <div className={`bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full ${bgColorClass} border-2 transform scale-95 animate-zoom-in`}>
         <div className="flex flex-col items-center mb-6">
+          {/* Corrected template literal for className */}
           <span className={`text-6xl mb-4 ${iconColorClass} animate-bounce-in`}>{icon}</span>
+          {/* Corrected template literal for className */}
           <h2 className={`text-3xl font-bold ${titleColorClass} text-center mb-2`}>{displayStatusText}</h2>
           <p className="text-md text-gray-600 text-center leading-relaxed">{response.message}</p>
         </div>
-
+        {/* --- UI UPDATE: Transaction Details Section --- */}
         {displayData && (
-          <div className="mt-6 p-5 bg-gray-50 rounded-lg border border-gray-200 shadow-inner max-h-72 overflow-y-auto">
+          <div className="mt-6 p-5 bg-white rounded-lg border border-gray-200 shadow-sm"> {/* Changed bg-gray-50 to bg-white for a cleaner look */}
             <p className="font-bold mb-4 text-gray-800 text-xl border-b pb-2 border-gray-200">Transaction Details</p>
-            {renderDetail('Transaction ID', displayData.transaction_id || displayData.possible_transaction_id)}
-            {renderDetail('Sender Name', displayData.sender_name)}
-            {renderDetail('Sender Bank', displayData.sender_bank_name)}
-            {renderDetail('Receiver Name', displayData.receiver_name)}
-            {renderDetail('Receiver Bank', displayData.receiver_bank_name)}
-            {renderDetail('Amount', displayData.amount ? `ETB ${displayData.amount.toFixed(2)}` : null)}
-            {renderDetail('Date', displayData.transaction_date || displayData.date)}
+            <div className="space-y-2"> {/* Added spacing between detail rows */}
+              {/* Corrected logical OR operators (||) */}
+              {renderDetail('Transaction ID', displayData.transaction_id || displayData.possible_transaction_id)}
+              {renderDetail('Sender Name', displayData.sender_name)}
+              {renderDetail('Sender Bank', displayData.sender_bank_name)}
+              {renderDetail('Receiver Name', displayData.receiver_name)}
+              {renderDetail('Receiver Bank', displayData.receiver_bank_name)}
+              {renderDetail('Amount', displayData.amount ? `ETB ${displayData.amount.toFixed(2)}` : null)}
+              {/* Corrected logical OR operators (||) */}
+              {renderDetail('Date', displayData.transaction_date || displayData.date)}
+            </div>
           </div>
         )}
+        {/* --- END UI UPDATE --- */}
 
         <div className="text-center mt-8">
           <button

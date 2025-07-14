@@ -5,8 +5,6 @@ import BankVerificationLayout from '../../components/BankVerificationLayout';
 import { VerificationResponse } from '../../components/ResultModal';
 
 export default function CBEPage() {
-  // BACKEND_BASE_URL is now accessed globally via process.env.NEXT_PUBLIC_BACKEND_BASE_URL
-  // No need to define it here anymore.
 
   const handleCBEVerify = async (
     inputMethod: 'text' | 'image' | 'camera',
@@ -68,7 +66,7 @@ export default function CBEPage() {
     if (!res.ok) {
       let errorMessage = data.message || data.detail || 'CBE verification failed.';
       if (Array.isArray(data.detail)) {
-        errorMessage = data.detail.map((item: any) => item.msg || JSON.stringify(item)).join(', ');
+        errorMessage = data.detail.map((item: { msg?: string }) => item.msg || JSON.stringify(item)).join(', ');
       }
       throw new Error(errorMessage);
     }

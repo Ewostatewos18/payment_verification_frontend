@@ -64,7 +64,7 @@ export default function BoaPage() {
     if (!res.ok) {
       let errorMessage = data.message || data.detail || 'Boa verification failed.';
       if (Array.isArray(data.detail)) {
-        errorMessage = data.detail.map((item: any) => item.msg || JSON.stringify(item)).join(', ');
+        errorMessage = data.detail.map((item: { msg?: string }) => item.msg || JSON.stringify(item)).join(', ');
       }
       throw new Error(errorMessage);
     }

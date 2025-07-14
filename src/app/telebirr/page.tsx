@@ -5,8 +5,6 @@ import BankVerificationLayout from '../../components/BankVerificationLayout';
 import { VerificationResponse } from '../../components/ResultModal';
 
 export default function TelebirrPage() {
-  // BACKEND_BASE_URL is now accessed globally via process.env.NEXT_PUBLIC_BACKEND_BASE_URL
-  // No need to define it here anymore.
 
   const handleTelebirrVerify = async (
     inputMethod: 'text' | 'image' | 'camera',
@@ -64,7 +62,10 @@ export default function TelebirrPage() {
     if (!res.ok) {
       let errorMessage = data.message || data.detail || 'Telebirr verification failed.';
       if (Array.isArray(data.detail)) {
-        errorMessage = data.detail.map((item: any) => item.msg || JSON.stringify(item)).join(', ');
+        errorMessage = data.detail.map((item: unknown) => {
+          const typedItem = item as { msg?: string };
+          return typedItem.msg || JSON.stringify(item);
+        }).join(', ');
       }
       throw new Error(errorMessage);
     }
