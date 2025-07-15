@@ -1,4 +1,3 @@
-// src/components/ResultModal.tsx
 import React from 'react';
 
 // --- Type Definitions (Centralized for consistency) ---
@@ -38,34 +37,33 @@ interface ResultModalProps {
 }
 
 const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
-  let bgColorClass = 'bg-blue-50 border-blue-200'; // Light blue for info/default
+  let bgColorClass = 'bg-blue-50 border-blue-200';
   let icon = 'ℹ️';
   let iconColorClass = 'text-blue-600';
   let titleColorClass = 'text-blue-800';
-  let displayStatusText = response.status.replace(/_/g, ' '); // Default formatting
+  let displayStatusText = response.status.replace(/_/g, ' ');
 
-  // Corrected logical OR operators (||)
   if (response.status === 'success' || response.status === 'HIGH_CONFIDENCE_OCR_MATCH' || response.status === 'Completed') {
-    bgColorClass = 'bg-green-50 border-green-200'; // Light green for success
-    icon = '✅'; // Checkmark icon
+    bgColorClass = 'bg-green-50 border-green-200';
+    icon = '✅';
     iconColorClass = 'text-green-600';
     titleColorClass = 'text-green-800';
-    displayStatusText = 'Verification Successful!'; // Clearer success message
+    displayStatusText = 'Success!';
   } else if (response.status === 'failed') {
-    bgColorClass = 'bg-red-50 border-red-200'; // Light red for failed
-    icon = '❌'; // Cross icon
+    bgColorClass = 'bg-red-50 border-red-200';
+    icon = '❌';
     iconColorClass = 'text-red-600';
     titleColorClass = 'text-red-800';
     displayStatusText = 'Verification Failed';
   } else if (response.status === 'warning' || response.status === 'pending' || response.status === 'PENDING_MANUAL_REVIEW') {
-    bgColorClass = 'bg-yellow-50 border-yellow-200'; // Light yellow for warning/pending
-    icon = '⚠️'; // Warning icon
+    bgColorClass = 'bg-yellow-50 border-yellow-200';
+    icon = '⚠️';
     iconColorClass = 'text-yellow-600';
     titleColorClass = 'text-yellow-800';
     displayStatusText = response.status === 'PENDING_MANUAL_REVIEW' ? 'Pending Manual Review' : 'Verification Pending';
   } else if (response.status === 'Account_Number_Required') {
-    bgColorClass = 'bg-orange-50 border-orange-200'; // Light orange for account number required
-    icon = '⚠️'; // Warning icon
+    bgColorClass = 'bg-orange-50 border-orange-200';
+    icon = '⚠️';
     iconColorClass = 'text-orange-600';
     titleColorClass = 'text-orange-800';
     displayStatusText = 'Account Number Required';
@@ -75,8 +73,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
   const displayData = response.verified_data || response.cbe_extracted_data || response.extracted_data;
 
   // The renderDetail function remains the same as it's already quite good for individual rows
-  const renderDetail = (label: string, value: unknown) => { // Changed 'any' to 'unknown' for better type safety
-    // Corrected logical OR operators (||)
+  const renderDetail = (label: string, value: any) => {
     if (value === undefined || value === null || value === '') return null;
     return (
       <div className="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
@@ -102,14 +99,12 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
           <div className="mt-6 p-5 bg-white rounded-lg border border-gray-200 shadow-sm"> {/* Changed bg-gray-50 to bg-white for a cleaner look */}
             <p className="font-bold mb-4 text-gray-800 text-xl border-b pb-2 border-gray-200">Transaction Details</p>
             <div className="space-y-2"> {/* Added spacing between detail rows */}
-              {/* Corrected logical OR operators (||) */}
               {renderDetail('Transaction ID', displayData.transaction_id || displayData.possible_transaction_id)}
               {renderDetail('Sender Name', displayData.sender_name)}
               {renderDetail('Sender Bank', displayData.sender_bank_name)}
               {renderDetail('Receiver Name', displayData.receiver_name)}
               {renderDetail('Receiver Bank', displayData.receiver_bank_name)}
               {renderDetail('Amount', displayData.amount ? `ETB ${displayData.amount.toFixed(2)}` : null)}
-              {/* Corrected logical OR operators (||) */}
               {renderDetail('Date', displayData.transaction_date || displayData.date)}
             </div>
           </div>
