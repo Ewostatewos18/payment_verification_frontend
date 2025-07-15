@@ -7,9 +7,12 @@ import Image from 'next/image'; // Import Next.js Image component
 
 export default function Home() {
   const router = useRouter();
+  // Reintroduced selectedBank state with its setter
+  
 
   // Corrected handleBankSelect to use the state setter
   const handleBankSelect = (bankName: string) => {
+   
     router.push(`/${bankName.toLowerCase()}`);
   };
 
@@ -82,6 +85,7 @@ export default function Home() {
                 width={80} // Explicit width
                 height={80} // Explicit height
                 priority // Load eagerly as it's above the fold
+                unoptimized={true} // Added to prevent Vercel optimization issues with external URLs
                 className="rounded-full w-full h-full object-cover"
               />
             }
@@ -96,6 +100,7 @@ export default function Home() {
                 width={80} // Explicit width
                 height={80} // Explicit height
                 priority // Load eagerly
+                unoptimized={true} // Added to prevent Vercel optimization issues with external URLs
                 className="rounded-full w-full h-full object-cover"
               />
             }
@@ -110,6 +115,7 @@ export default function Home() {
                 width={80} // Explicit width
                 height={80} // Explicit height
                 priority // Load eagerly
+                unoptimized={true} // Added to prevent Vercel optimization issues with external URLs
                 className="rounded-full w-full h-full object-cover"
               />
             }
