@@ -2,13 +2,13 @@
 'use client';
 
 import BankVerificationLayout from '../../components/BankVerificationLayout';
-import { VerificationResponse } from '../../components/ResultModal'; // Ensure this path is correct
+import { VerificationResponse } from '../../components/ResultModal'; 
 
 export default function BoaPage() {
   const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000';
 
   const handleBoaVerify = async (
-    inputMethod: 'text' | 'image' | 'camera', // This now reflects the specific method for the backend
+    inputMethod: 'text' | 'image' | 'camera', 
     transactionId: string,
     accountNumber: string,
     fileToUpload: File | Blob | null
@@ -74,7 +74,6 @@ export default function BoaPage() {
   return (
     <BankVerificationLayout
       bankName="Boa"
-      bankColorClass="from-yellow-50 to-yellow-100" // Specific background gradient for Boa
       requiresAccountNumber={true} // Boa requires account number
       onVerify={handleBoaVerify}
     />

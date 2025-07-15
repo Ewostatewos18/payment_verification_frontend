@@ -12,7 +12,6 @@ type InputMethod = 'text' | 'image' | 'camera';
 
 interface BankVerificationLayoutProps {
   bankName: string;
-  bankColorClass: string; // e.g., 'from-green-50 to-green-100' for Telebirr
   requiresAccountNumber: boolean;
   onVerify: (
     inputMethod: InputMethod,
@@ -24,7 +23,6 @@ interface BankVerificationLayoutProps {
 
 const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
   bankName,
-  bankColorClass, // This will now be used for the *main background gradient* of this page
   requiresAccountNumber,
   onVerify,
 }) => {
@@ -175,7 +173,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
             className={`
               flex-1 min-w-[120px] px-4 py-3 rounded-xl font-semibold text-lg transition duration-300 ease-in-out transform
               ${activeInputMethod === 'text'
-                ? 'bg-blue-600 text-white shadow-lg scale-100'
+                ? 'bg-blue-400 text-white shadow-lg scale-100'
                 : 'bg-transparent text-gray-700 hover:bg-gray-200 hover:scale-98'}
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100
             `}
@@ -189,7 +187,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
             className={`
               flex-1 min-w-[120px] px-4 py-3 rounded-xl font-semibold text-lg transition duration-300 ease-in-out transform
               ${activeInputMethod === 'image'
-                ? 'bg-green-600 text-white shadow-lg scale-100'
+                ? 'bg-green-800 text-white shadow-lg scale-100'
                 : 'bg-transparent text-gray-700 hover:bg-gray-200 hover:scale-98'}
               focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-100
             `}
@@ -203,7 +201,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
             className={`
               flex-1 min-w-[120px] px-4 py-3 rounded-xl font-semibold text-lg transition duration-300 ease-in-out transform
               ${activeInputMethod === 'camera'
-                ? 'bg-purple-600 text-white shadow-lg scale-100'
+                ? 'bg-purple-400 text-white shadow-lg scale-100'
                 : 'bg-transparent text-gray-700 hover:bg-gray-200 hover:scale-98'}
               focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-100
             `}

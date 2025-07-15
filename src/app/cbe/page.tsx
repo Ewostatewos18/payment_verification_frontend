@@ -76,7 +76,6 @@ export default function CBEPage() {
   return (
     <BankVerificationLayout
       bankName="CBE"
-      bankColorClass="from-blue-50 to-indigo-100"
       requiresAccountNumber={true}
       onVerify={handleCBEVerify}
     />

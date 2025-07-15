@@ -75,7 +75,6 @@ export default function TelebirrPage() {
   return (
     <BankVerificationLayout
       bankName="Telebirr"
-      bankColorClass="from-green-50 to-green-100"
       requiresAccountNumber={false}
       onVerify={handleTelebirrVerify}
     />

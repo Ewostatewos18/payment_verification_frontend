@@ -1,30 +1,33 @@
 // src/app/page.tsx
-'use client';
+'use client'; // This is a Client Component
 
+import React, { useState } from 'react'; // Import useState
 import { useRouter } from 'next/navigation';
 
-type BankType = 'telebirr' | 'cbe' | 'boa';
 
 export default function Home() {
   const router = useRouter();
-  // Removed unused state 'selectedBank'
+  // Reintroduced selectedBank state with its setter
+  const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
-  const handleBankSelect = (bank: BankType) => {
-    setSelectedBank(bank);
-    router.push(`/${bank}`);
+  // Corrected handleBankSelect to use the state setter
+  const handleBankSelect = (bankName: string) => {
+    setSelectedBank(bankName); // Correctly updates the state
+    router.push(`/${bankName.toLowerCase()}`);
   };
 
   // Helper component for individual bank cards with enhanced styling and animations
-  const BankCard = ({ bank, icon, description }: { bank: BankType; icon: React.ReactNode; description: string }) => (
+  // Using string for bank prop for simplicity, matching router.push
+  const BankCard = ({ bank, icon, description }: { bank: string; icon: React.ReactNode; description: string }) => (
     <button
       type="button"
-      onClick={() => handleBankSelect(bank)}
+      onClick={() => handleBankSelect(bank)} // Corrected: pass a function reference
       className={`
         relative flex flex-col items-center justify-center p-8 rounded-3xl shadow-lg
         transition-all duration-300 ease-in-out transform /* Re-added transform for scale */
         hover:scale-105 hover:shadow-2xl /* Re-added scale and enhanced shadow on hover */
         focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-400
-        bg-white text-blue-500 font-semibold text-lg 
+        bg-white text-blue-500 font-semibold text-lg
         overflow-hidden group /* Re-added group for hover effects */
         min-h-[280px] border border-gray-200 /* Add a subtle border */
       `}
@@ -74,18 +77,27 @@ export default function Home() {
         {/* Bank Selection Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-full mx-auto">
           <BankCard
-            bank="telebirr"
-            icon={<img src="https://addisfortune.news/wp-content/uploads/2023/04/Telebir.jpg" alt="Telebirr Icon" className="rounded-full w-full h-full object-cover" />}
+            bank="Telebirr" // Use "Telebirr" for display, will be lowercased for route
+            icon={
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="https://addisfortune.news/wp-content/uploads/2023/04/Telebir.jpg" alt="Telebirr Icon" className="rounded-full w-full h-full object-cover" />
+            }
             description="Verify mobile money transfers instantly."
           />
           <BankCard
-            bank="cbe"
-            icon={<img src="https://www.advantechafrica.com/wp-content/uploads/2020/01/images.png" alt="CBE Icon" className="rounded-full w-full h-full object-cover" />}
+            bank="CBE" // Use "CBE" for display, will be lowercased for route
+            icon={
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="https://www.advantechafrica.com/wp-content/uploads/2020/01/images.png" alt="CBE Icon" className="rounded-full w-full h-full object-cover" />
+            }
             description="Confirm Commercial Bank of Ethiopia transactions."
           />
           <BankCard
-            bank="boa"
-            icon={<img src="https://myviewsonnews.net/wp-content/uploads/2024/04/Bank-of-Abyssinia.png" alt="Boa Icon" className="rounded-full w-full h-full object-cover" />}
+            bank="Boa" // Use "Boa" for display, will be lowercased for route
+            icon={
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="https://myviewsonnews.net/wp-content/uploads/2024/04/Bank-of-Abyssinia.png" alt="Boa Icon" className="rounded-full w-full h-full object-cover" />
+            }
             description="Validate Bank of Abyssinia payments."
           />
         </div>
@@ -137,14 +149,3 @@ export default function Home() {
     </main>
   );
 }
-// Removed unused state 'selectedBank'
-
-function setSelectedBank(bank: BankType) {
-  console.log(`Selected bank: ${bank}`);
-  setSelectedBankState(bank);
-}
-
-const setSelectedBankState = (bank: BankType) => {
-  setSelectedBank(bank);
-};
-
