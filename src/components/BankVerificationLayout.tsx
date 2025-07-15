@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, ChangeEvent, FormEvent, useRef, useCallback } from 'react';
-import Image from 'next/image';
+// Removed: import Image from 'next/image'; // Not needed if using <img> for dynamic URLs
 import Webcam from 'react-webcam';
 import ResultModal, { VerificationResponse } from './ResultModal'; // Import ResultModal and its types
 import { useRouter } from 'next/navigation'; // Import useRouter
@@ -20,6 +20,8 @@ interface BankVerificationLayoutProps {
     fileToUpload: File | Blob | null
   ) => Promise<VerificationResponse>;
 }
+
+// Removed: const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:8000'; // No longer used in this component
 
 const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
   bankName,
@@ -132,8 +134,9 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
       setResponse(result);
       console.log('Verification Success! Response set to state.');
     } catch (err: unknown) {
+      // Reverted to more robust error message
       const errorMessage =
-        (err instanceof Error ? err.message : 'An unknown error occurred during verification. Please check console for details.');
+        (err instanceof Error ? err.message : String(err)) || 'An unknown error occurred during verification. Please check console for details.';
       setError(errorMessage);
       console.error('Verification Error:', errorMessage, err);
     } finally {
@@ -270,9 +273,9 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
               </div>
               {imageFile && (
                 <div className="mt-4 text-center p-4 bg-gray-100 rounded-lg shadow-inner">
-                  <Image src={URL.createObjectURL(imageFile)} alt="Selected Preview" width={500} height={500} className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200" />
-                  <Image src={URL.createObjectURL(imageFile)} alt="Selected Preview" width={500} height={500} className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200" />
-                  
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={URL.createObjectURL(imageFile)} alt="Selected Preview" className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200" />
+                  {/* Removed duplicate image tag */}
                 </div>
               )}
               {requiresAccountNumber && (
@@ -340,11 +343,10 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
               {capturedImageSrc && (
                 <div className="mt-4 text-center p-4 bg-gray-100 rounded-lg shadow-inner">
                   <p className="text-sm text-gray-600 mb-3">Captured image preview:</p>
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={URL.createObjectURL(new Blob([atob(capturedImageSrc.split(',')[1])], { type: capturedImageSrc.split(',')[0].split(':')[1].split(';')[0] }))}
                     alt="Captured"
-                    width={500}
-                    height={500}
                     className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200"
                   />
                 </div>

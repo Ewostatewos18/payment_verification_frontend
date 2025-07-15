@@ -1,18 +1,15 @@
 // src/app/page.tsx
 'use client'; // This is a Client Component
 
-import React, { useState } from 'react'; // Import useState
+import React from 'react'; // Import React
 import { useRouter } from 'next/navigation';
-
+import Image from 'next/image'; // Import Next.js Image component
 
 export default function Home() {
   const router = useRouter();
-  // Reintroduced selectedBank state with its setter
-  const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
   // Corrected handleBankSelect to use the state setter
   const handleBankSelect = (bankName: string) => {
-    setSelectedBank(bankName); // Correctly updates the state
     router.push(`/${bankName.toLowerCase()}`);
   };
 
@@ -79,24 +76,42 @@ export default function Home() {
           <BankCard
             bank="Telebirr" // Use "Telebirr" for display, will be lowercased for route
             icon={
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src="https://addisfortune.news/wp-content/uploads/2023/04/Telebir.jpg" alt="Telebirr Icon" className="rounded-full w-full h-full object-cover" />
+              <Image
+                src="https://addisfortune.news/wp-content/uploads/2023/04/Telebir.jpg"
+                alt="Telebirr Icon"
+                width={80} // Explicit width
+                height={80} // Explicit height
+                priority // Load eagerly as it's above the fold
+                className="rounded-full w-full h-full object-cover"
+              />
             }
             description="Verify mobile money transfers instantly."
           />
           <BankCard
             bank="CBE" // Use "CBE" for display, will be lowercased for route
             icon={
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src="https://www.advantechafrica.com/wp-content/uploads/2020/01/images.png" alt="CBE Icon" className="rounded-full w-full h-full object-cover" />
+              <Image
+                src="https://www.advantechafrica.com/wp-content/uploads/2020/01/images.png"
+                alt="CBE Icon"
+                width={80} // Explicit width
+                height={80} // Explicit height
+                priority // Load eagerly
+                className="rounded-full w-full h-full object-cover"
+              />
             }
             description="Confirm Commercial Bank of Ethiopia transactions."
           />
           <BankCard
             bank="Boa" // Use "Boa" for display, will be lowercased for route
             icon={
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src="https://myviewsonnews.net/wp-content/uploads/2024/04/Bank-of-Abyssinia.png" alt="Boa Icon" className="rounded-full w-full h-full object-cover" />
+              <Image
+                src="https://myviewsonnews.net/wp-content/uploads/2024/04/Bank-of-Abyssinia.png"
+                alt="Boa Icon"
+                width={80} // Explicit width
+                height={80} // Explicit height
+                priority // Load eagerly
+                className="rounded-full w-full h-full object-cover"
+              />
             }
             description="Validate Bank of Abyssinia payments."
           />

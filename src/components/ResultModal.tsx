@@ -73,7 +73,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
   const displayData = response.verified_data || response.cbe_extracted_data || response.extracted_data;
 
   // The renderDetail function remains the same as it's already quite good for individual rows
-  const renderDetail = (label: string, value: any) => {
+  const renderDetail = (label: string, value: unknown) => {
     if (value === undefined || value === null || value === '') return null;
     return (
       <div className="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
