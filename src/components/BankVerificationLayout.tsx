@@ -7,7 +7,8 @@ import ResultModal, { VerificationResponse } from './ResultModal';
 import { useRouter } from 'next/navigation';
 
 // --- Type Definitions ---
-type InputMethod = 'text' | 'media'; 
+type InputMethod = 'text' | 'media';
+
 interface BankVerificationLayoutProps {
   bankName: string;
   requiresAccountNumber: boolean;
@@ -59,13 +60,13 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
     setResponse(null);
     setError(null);
     setIsCameraActive(false);
-    setShowCamera(false); 
+    setShowCamera(false);
   };
 
   const handleInputMethodToggle = () => {
     // Toggle between 'text' and 'media'
     setActiveInputMethod(prevMethod => (prevMethod === 'text' ? 'media' : 'text'));
-    resetForm(); 
+    resetForm();
   };
 
   // Function to toggle camera view
@@ -197,15 +198,15 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
   };
 
   return (
-    <main className={`flex min-h-screen flex-col items-center justify-start p-0 bg-gradient-to-br from-gray-100 to-gray-200 font-sans text-gray-800 relative overflow-hidden`}>
+    <main className={`flex min-h-screen flex-col items-center justify-start p-10 bg-gradient-to-br from-gray-100 to-gray-200 font-sans text-gray-800 relative overflow-hidden`}>
       {/* Background circles for dynamic effect - Consistent with main page */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-blue-200 opacity-20 rounded-full mix-blend-multiply animate-float-slow" style={{ animationDelay: '0s' }}></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-200 opacity-20 rounded-full mix-blend-multiply animate-float-medium" style={{ animationDelay: '2s' }}></div>
       <div className="absolute top-1/3 right-1/12 w-48 h-48 bg-green-200 opacity-20 rounded-full mix-blend-multiply animate-float-fast" style={{ animationDelay: '4s' }}></div>
 
-      <div className="w-full flex-grow flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 z-10">
-        {/* Header Section - Full Width */}
-        <div className="w-full max-w-5xl flex justify-between items-center py-6 px-4 sm:px-8 bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-b-3xl shadow-lg mb-8">
+      <div className="w-full flex-grow flex flex-col items-center justify-center p-4 sm:p-8 md:p-12 z-10 bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-3xl shadow-2xl border border-gray-100 animate-fade-in-up max-w-5xl">
+        {/* Header Content - Now part of the main section */}
+        <div className="w-full flex justify-between items-center py-4 px-4 sm:px-8 mb-8"> {/* Adjusted padding and margin */}
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">{bankName} Verification</h1>
           <button
             onClick={() => router.push('/')}
@@ -218,12 +219,12 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
           </button>
         </div>
 
-        <p className="text-xl text-center text-gray-700 mb-12 max-w-3xl leading-relaxed animate-fade-in-up">
+        <p className="text-xl text-center text-gray-700 mb-12 max-w-3xl leading-relaxed">
           Verify {bankName} transactions using your preferred method.
         </p>
 
         {/* Single Toggle Button for Input Method */}
-        <div className="mb-8 flex justify-center w-full max-w-sm animate-fade-in-up">
+        <div className="mb-8 flex justify-center w-full max-w-sm">
           <button
             type="button"
             onClick={handleInputMethodToggle}
@@ -241,7 +242,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
         </div>
 
         {/* Main Verification Form */}
-        <form onSubmit={handleSubmit} className="p-8 border border-gray-200 rounded-2xl bg-gray-50 shadow-inner animate-fade-in w-full max-w-4xl">
+        <form onSubmit={handleSubmit} className="p-8 border border-gray-200 rounded-2xl bg-gray-50 shadow-inner w-full max-w-4xl">
           {activeInputMethod === 'text' && (
             <>
               <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Enter Transaction Details</h2>
@@ -318,6 +319,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
                       ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}
                       text-gray-600 cursor-pointer transition-all duration-200
                       hover:border-blue-400 hover:text-blue-600
+                      relative flex flex-col items-center justify-center
                     `}
                   >
                     <input
@@ -329,20 +331,29 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
                       className="hidden"
                       required={!imageFile && !capturedImageSrc} // Required if no file and no captured image
                     />
-                    <p className="text-lg font-semibold mb-2">Drag & Drop Image Here</p>
-                    <p className="text-sm mb-4">or</p>
-                    <span className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-5 rounded-full transition duration-200 shadow-md">
-                      Browse Files
-                    </span>
+                    {imageFile ? (
+                      <div className="flex flex-col items-center">
+                        <p className="text-lg font-semibold mb-2 text-blue-700">
+                          Selected file: <span className="font-bold">{imageFile.name}</span>
+                        </p>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setImageFile(null); }} // Stop propagation and clear file
+                          className="mt-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-full shadow-md transition duration-200"
+                        >
+                          Remove File
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-lg font-semibold mb-2">Drag & Drop Image Here</p>
+                        <p className="text-sm mb-4">or</p>
+                        <span className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-5 rounded-full transition duration-200 shadow-md">
+                          Browse Files
+                        </span>
+                      </>
+                    )}
                   </label>
-
-                  {imageFile && (
-                    <div className="mt-6 text-center p-4 bg-gray-100 rounded-lg shadow-inner border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-3">Selected file: <span className="font-medium text-gray-800">{imageFile.name}</span></p>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={URL.createObjectURL(imageFile)} alt="Selected Preview" className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200" />
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -392,13 +403,7 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
                   </div>
                   {capturedImageSrc && (
                     <div className="mt-4 text-center p-4 bg-gray-100 rounded-lg shadow-inner border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-3">Captured image preview:</p>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={URL.createObjectURL(new Blob([atob(capturedImageSrc.split(',')[1])], { type: capturedImageSrc.split(',')[0].split(':')[1].split(';')[0] }))}
-                        alt="Captured"
-                        className="max-w-full h-auto rounded-lg shadow-md mx-auto border border-gray-200"
-                      />
+                      <p className="text-sm text-gray-600 mb-3">Image Captured!</p>
                     </div>
                   )}
                 </div>
