@@ -1,4 +1,6 @@
 import React from 'react';
+import SuccessModal from './SuccessModal';
+import FailedModal from './FailedModal';
 
 // --- Type Definitions (Centralized for consistency) ---
 interface ExtractedData {
@@ -34,27 +36,32 @@ export interface VerificationResponse {
 interface ResultModalProps {
   response: VerificationResponse;
   onClose: () => void;
+  onRetry?: () => void;
 }
 
-const ResultModal: React.FC<ResultModalProps> = ({ response, onClose }) => {
+const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry }) => {
+  // Check if this is a successful transaction and use the new SuccessModal
+  if (response.status === 'success' || response.status === 'HIGH_CONFIDENCE_OCR_MATCH' || response.status === 'Completed') {
+    const displayData = response.verified_data || response.cbe_extracted_data || response.extracted_data;
+    
+    const transactionData = {
+      senderBank: displayData?.sender_bank_name || '',
+      receiverName: displayData?.receiver_name || '',
+      amount: displayData?.amount ? `ETB ${displayData.amount.toFixed(2)}` : '',
+      date: displayData?.transaction_date || displayData?.date || ''
+    };
+
+    return <SuccessModal onClose={onClose} transactionData={transactionData} />;
+  }
+
   let bgColorClass = 'bg-blue-50 border-blue-200';
   let icon = 'ℹ️';
   let iconColorClass = 'text-blue-600';
   let titleColorClass = 'text-blue-800';
   let displayStatusText = response.status.replace(/_/g, ' ');
 
-  if (response.status === 'success' || response.status === 'HIGH_CONFIDENCE_OCR_MATCH' || response.status === 'Completed') {
-    bgColorClass = 'bg-green-50 border-green-200';
-    icon = '✅';
-    iconColorClass = 'text-green-600';
-    titleColorClass = 'text-green-800';
-    displayStatusText = 'Success!';
-  } else if (response.status === 'failed') {
-    bgColorClass = 'bg-red-50 border-red-200';
-    icon = '❌';
-    iconColorClass = 'text-red-600';
-    titleColorClass = 'text-red-800';
-    displayStatusText = 'Verification Failed';
+  if (response.status === 'failed') {
+    return <FailedModal onClose={onClose} onRetry={onRetry || (() => window.location.reload())} errorMessage={response.message || 'Transaction verification failed'} />;
   } else if (response.status === 'warning' || response.status === 'pending' || response.status === 'PENDING_MANUAL_REVIEW') {
     bgColorClass = 'bg-yellow-50 border-yellow-200';
     icon = '⚠️';
