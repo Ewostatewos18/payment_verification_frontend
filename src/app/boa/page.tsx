@@ -3,7 +3,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ResultModal from '../../components/ResultModal';
-import { VerificationResponse } from '../../components/ResultModal'; 
+import { VerificationResponse } from '../../components/ResultModal';
+import { apiClient, ApiResponse } from '../../lib/api';
+import { ErrorHandler, ErrorState } from '../../lib/errorHandler'; 
 
 export default function BoaPage() {
   const router = useRouter();
@@ -11,14 +13,18 @@ export default function BoaPage() {
   const [accountNumber, setAccountNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<VerificationResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorState | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'transaction'>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 
   const handleBoaVerify = async () => {
     if (!transactionId.trim() || !accountNumber.trim()) {
-      setError('Please enter both transaction ID and account number');
+      setError({
+        message: 'Please enter both transaction ID and account number',
+        type: 'validation',
+        retryable: false
+      });
       return;
     }
 
@@ -26,35 +32,15 @@ export default function BoaPage() {
     setError(null);
 
     try {
-      const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
-      if (!BACKEND_BASE_URL) {
-        throw new Error("Backend URL is not configured. Please set NEXT_PUBLIC_BACKEND_BASE_URL in your .env.local file.");
-      }
+      const data: ApiResponse = await apiClient.verifyBoaPayment({
+        transaction_id: transactionId,
+        account_number: accountNumber,
+      });
 
-      const res = await fetch(`${BACKEND_BASE_URL}/verify_boa_payment`, {
-      method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          transaction_id: transactionId,
-          sender_account: accountNumber,
-        }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-        let errorMessage = data.message || data.detail || 'BOA verification failed.';
-      if (Array.isArray(data.detail)) {
-        errorMessage = data.detail.map((item: { msg?: string }) => item.msg || JSON.stringify(item)).join(', ');
-      }
-      throw new Error(errorMessage);
-    }
-
-      setResponse(data);
+      setResponse(data as VerificationResponse);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorState = ErrorHandler.handle(err);
+      setError(errorState);
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +76,11 @@ export default function BoaPage() {
       stream.getTracks().forEach(track => track.stop());
     } catch (error) {
       console.error('Error accessing camera:', error);
-      setError('Unable to access camera. Please check your permissions.');
+      setError({
+        message: 'Unable to access camera. Please check your permissions.',
+        type: 'validation',
+        retryable: false
+      });
     }
   };
 
@@ -360,13 +350,29 @@ export default function BoaPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-semibold text-red-600 mb-4">Error</h3>
-            <p className="text-gray-700 mb-6">{error}</p>
-            <button
-              onClick={closeModal}
-              className="w-full bg-[#18181B] text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors"
-            >
-              Close
-            </button>
+            <p className="text-gray-700 mb-4">{error.message}</p>
+            {error.details && (
+              <p className="text-sm text-gray-500 mb-6">{error.details}</p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={closeModal}
+                className="flex-1 bg-[#18181B] text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors"
+              >
+                Close
+              </button>
+              {ErrorHandler.isRetryable(error) && (
+                <button
+                  onClick={() => {
+                    setError(null);
+                    handleBoaVerify();
+                  }}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Retry
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

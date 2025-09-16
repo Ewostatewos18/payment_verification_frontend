@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Payment Verification Frontend
+
+A clean, modern Next.js frontend application for payment verification with real backend integration.
+
+## Features
+
+- **Multi-Bank Support**: Telebirr, Bank of Abyssinia (BOA), and Commercial Bank of Ethiopia (CBE)
+- **Dual Input Methods**: Transaction ID entry and file upload
+- **Real API Integration**: Connects to Laravel backend for actual verification
+- **Mock API Support**: Optional mock mode for testing without backend
+- **Responsive Design**: Modern UI with Tailwind CSS
+- **TypeScript**: Full type safety throughout the application
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with React 19
+- **Styling**: Tailwind CSS 4
+- **Language**: TypeScript
+- **State Management**: React Hooks
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd payment_verification_frontend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Configure environment variables:
+```bash
+# Edit .env with your backend URL
+nano .env
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Install dependencies:
+```bash
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+The application will be available at `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+### Environment Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md) for detailed configuration instructions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage
 
-## Deploy on Vercel
+1. **Select a Bank**: Choose from Telebirr, BOA, or CBE
+2. **Enter Details**: 
+   - For Telebirr: Enter transaction ID
+   - For BOA/CBE: Enter transaction ID and account number
+3. **Verify**: Click the verify button to verify with real backend
+4. **View Results**: See detailed transaction information in a modal
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Backend Integration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The frontend connects to a Laravel backend API:
+
+- **Telebirr**: `/api/telebirr/verify`
+- **BOA**: `/api/boa/verify` 
+- **CBE**: `/api/cbe/verify`
+
+### Mock Mode
+
+Set `NEXT_PUBLIC_USE_MOCK_API=true` in `.env` to use mock data instead of real API calls.
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app router pages
+│   ├── page.tsx           # Home page with bank selection
+│   ├── telebirr/          # Telebirr verification page
+│   ├── boa/               # Bank of Abyssinia verification page
+│   └── cbe/               # Commercial Bank of Ethiopia verification page
+└── components/            # Reusable React components
+    ├── ResultModal.tsx    # Payment verification results modal
+    ├── SuccessModal.tsx   # Success state modal
+    └── FailedModal.tsx    # Error state modal
+```
+
+## Development
+
+### Available Scripts
+
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
+
+## Customization
+
+- **Styling**: Modify Tailwind classes in components
+- **Mock Data**: Update the mock responses in each page component
+- **UI Components**: Add new components in the `components/` directory
+- **Pages**: Add new verification pages in the `app/` directory
+
+## Backend Requirements
+
+This frontend requires a Laravel backend with the following API endpoints:
+
+- `POST /api/telebirr/verify` - Telebirr payment verification
+- `POST /api/boa/verify` - BOA payment verification  
+- `POST /api/cbe/verify` - CBE payment verification
+
+See the backend repository for implementation details.
+
+## License
+
+This project is licensed under the MIT License.

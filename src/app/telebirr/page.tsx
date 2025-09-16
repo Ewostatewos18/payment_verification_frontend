@@ -4,20 +4,26 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ResultModal from '../../components/ResultModal';
 import { VerificationResponse } from '../../components/ResultModal';
+import { apiClient, ApiResponse } from '../../lib/api';
+import { ErrorHandler, ErrorState } from '../../lib/errorHandler';
 
 export default function TelebirrPage() {
   const router = useRouter();
   const [transactionId, setTransactionId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<VerificationResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorState | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'transaction'>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 
   const handleTelebirrVerify = async () => {
     if (!transactionId.trim()) {
-      setError('Please enter a transaction ID');
+      setError({
+        message: 'Please enter a transaction ID',
+        type: 'validation',
+        retryable: false
+      });
       return;
     }
 
@@ -25,34 +31,14 @@ export default function TelebirrPage() {
     setError(null);
 
     try {
-    const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
-    if (!BACKEND_BASE_URL) {
-      throw new Error("Backend URL is not configured. Please set NEXT_PUBLIC_BACKEND_BASE_URL in your .env.local file.");
-    }
+      const data: ApiResponse = await apiClient.verifyTelebirrPayment({
+        transaction_id: transactionId,
+      });
 
-      const res = await fetch(`${BACKEND_BASE_URL}/verify_telebirr_payment`, {
-      method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          transaction_id: transactionId,
-        }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      let errorMessage = data.message || data.detail || 'Telebirr verification failed.';
-      if (Array.isArray(data.detail)) {
-          errorMessage = data.detail.map((item: { msg?: string }) => item.msg || JSON.stringify(item)).join(', ');
-      }
-      throw new Error(errorMessage);
-    }
-
-      setResponse(data);
+      setResponse(data as VerificationResponse);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorState = ErrorHandler.handle(err);
+      setError(errorState);
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +74,11 @@ export default function TelebirrPage() {
       stream.getTracks().forEach(track => track.stop());
     } catch (error) {
       console.error('Error accessing camera:', error);
-      setError('Unable to access camera. Please check your permissions.');
+      setError({
+        message: 'Unable to access camera. Please check your permissions.',
+        type: 'validation',
+        retryable: false
+      });
     }
   };
 
@@ -311,13 +301,29 @@ export default function TelebirrPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-semibold text-red-600 mb-4">Error</h3>
-            <p className="text-gray-700 mb-6">{error}</p>
-            <button
-              onClick={closeModal}
-              className="w-full bg-[#18181B] text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors"
-            >
-              Close
-            </button>
+            <p className="text-gray-700 mb-4">{error.message}</p>
+            {error.details && (
+              <p className="text-sm text-gray-500 mb-6">{error.details}</p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={closeModal}
+                className="flex-1 bg-[#18181B] text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors"
+              >
+                Close
+              </button>
+              {ErrorHandler.isRetryable(error) && (
+                <button
+                  onClick={() => {
+                    setError(null);
+                    handleTelebirrVerify();
+                  }}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Retry
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

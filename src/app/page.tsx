@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import HealthCheck from '../components/HealthCheck';
 
 export default function Home() {
   const router = useRouter();
@@ -21,6 +21,9 @@ export default function Home() {
           <h1 className="w-[928px] h-[35px] font-['Inter'] font-bold text-[28px] leading-[35px] text-center text-[#121417]">
             Verify your payment method
           </h1>
+          <div className="mt-2">
+            <HealthCheck />
+          </div>
         </div>
 
         {/* Subtitle Section - Depth 4, Frame 1 */}
@@ -83,8 +86,8 @@ export default function Home() {
           {/* Clickable Overlay */}
           <button
             onClick={() => handleBankSelect('boa')}
-            className="absolute inset-0 w-full h-full bg-transparent"
-          ></button>
+            className="absolute inset-0 w-full h-full bg-transparent">
+            </button>
         </div>
 
         {/* Commercial Bank of Ethiopia Card Section - Depth 4, Frame 4 */}
@@ -128,3 +131,6 @@ export default function Home() {
     </div>
   );
 }
+
+
+
