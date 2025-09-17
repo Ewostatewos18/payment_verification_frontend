@@ -22,6 +22,7 @@ export interface VerificationRequest {
 export interface FileUploadRequest {
   file: File;
   transaction_id?: string;
+  account_number?: string;
 }
 
 export interface ApiError {
@@ -129,7 +130,7 @@ class ApiClient {
     try {
       const response = await this.client.post('/boa/verify', {
         transaction_id: request.transaction_id,
-        sender_account_last_5_digits: request.sender_account?.slice(-5),
+        sender_account_last_5_digits: (request.sender_account || request.account_number)?.slice(-5),
       });
       
       return this.transformResponse(response.data);
@@ -155,9 +156,12 @@ class ApiClient {
   async verifyCbeImage(request: FileUploadRequest): Promise<ApiResponse> {
     try {
       const formData = new FormData();
-      formData.append('file', request.file);
+      formData.append('image', request.file);
       if (request.transaction_id) {
         formData.append('transaction_id', request.transaction_id);
+      }
+      if (request.account_number) {
+        formData.append('account_number', request.account_number);
       }
 
       const response = await this.client.post('/image/cbe/verify', formData, {
@@ -175,9 +179,12 @@ class ApiClient {
   async verifyBoaImage(request: FileUploadRequest): Promise<ApiResponse> {
     try {
       const formData = new FormData();
-      formData.append('file', request.file);
+      formData.append('image', request.file);
       if (request.transaction_id) {
         formData.append('transaction_id', request.transaction_id);
+      }
+      if (request.account_number) {
+        formData.append('sender_account', request.account_number);
       }
 
       const response = await this.client.post('/image/boa/verify', formData, {
@@ -195,9 +202,12 @@ class ApiClient {
   async verifyTelebirrImage(request: FileUploadRequest): Promise<ApiResponse> {
     try {
       const formData = new FormData();
-      formData.append('file', request.file);
+      formData.append('image', request.file);
       if (request.transaction_id) {
         formData.append('transaction_id', request.transaction_id);
+      }
+      if (request.account_number) {
+        formData.append('account_number', request.account_number);
       }
 
       const response = await this.client.post('/image/telebirr/verify', formData, {

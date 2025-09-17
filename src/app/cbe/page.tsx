@@ -52,6 +52,7 @@ export default function CBEPage() {
         data = await apiClient.verifyCbeImage({
           file: selectedFile!,
           transaction_id: transactionId || undefined,
+          account_number: accountNumber,
         });
       } else {
         // Use transaction ID verification

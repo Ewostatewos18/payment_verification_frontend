@@ -501,7 +501,9 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
               
               {/* Title */}
               <div className="w-[208px] h-5 font-['Inter'] font-semibold text-xl leading-5 text-[#09090B] text-center whitespace-nowrap">
-                Invalid Transaction ID
+                {displayData?.status === 'Service Unavailable' 
+                  ? 'Service Unavailable' 
+                  : 'Invalid Transaction ID'}
               </div>
               
               {/* Status Button */}
@@ -518,7 +520,9 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
             
             {/* Additional Information */}
             <div className="w-[432px] h-10 font-['Inter'] font-normal text-base leading-5 text-center text-[#8C8C8C]">
-              Transaction verification failed. Please check your transaction ID and try again.
+              {displayData?.status === 'Service Unavailable' 
+                ? 'CBE verification service is temporarily unavailable. Please try again later.'
+                : 'Transaction verification failed. Please check your transaction ID and try again.'}
             </div>
 
             {/* Action Buttons */}
@@ -580,7 +584,9 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
             
             {/* Title */}
             <div className="w-[208px] h-5 font-['Inter'] font-semibold text-xl leading-5 text-[#09090B] text-center whitespace-nowrap">
-              Invalid Transaction ID
+              {displayData?.status === 'Service Unavailable' 
+                ? 'Service Unavailable' 
+                : 'Invalid Transaction ID'}
             </div>
             
             {/* Status Button */}
@@ -597,7 +603,9 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
           
           {/* Additional Information */}
           <div className="w-[432px] h-10 font-['Inter'] font-normal text-base leading-5 text-center text-[#8C8C8C]">
-            Transaction verification failed. Please check your transaction ID and try again.
+            {displayData?.status === 'Service Unavailable' 
+              ? 'CBE verification service is temporarily unavailable. Please try again later.'
+              : 'Transaction verification failed. Please check your transaction ID and try again.'}
           </div>
 
           {/* Action Buttons */}
