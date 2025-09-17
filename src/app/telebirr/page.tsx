@@ -172,7 +172,30 @@ export default function TelebirrPage() {
             {activeTab === 'upload' ? (
               <>
                 {/* Upload Area - Depth 5, Frame 0 */}
-                <div className="w-[928px] h-[249px] flex flex-col items-center py-14 px-6 gap-6 border-2 border-dashed border-[#DBE0E6] rounded-lg">
+                <div 
+                  className="w-[928px] h-[249px] flex flex-col items-center py-14 px-6 gap-6 border-2 border-dashed border-[#DBE0E6] rounded-lg"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDragLeave={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    if (files && files[0]) {
+                      const file = files[0];
+                      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                        setSelectedFile(file);
+                        console.log('File dropped:', file.name);
+                      } else {
+                        setError({
+                          message: 'Please drop an image file or PDF',
+                          type: 'validation',
+                          retryable: false
+                        });
+                      }
+                    }
+                  }}
+                  onClick={handleBrowseFile}
+                  style={{ cursor: 'pointer' }}
+                >
                   
                   {/* Text Content - Depth 6, Frame 0 */}
                   <div className="w-[480px] max-w-[480px] h-[73px] flex flex-col items-center gap-2">
@@ -201,7 +224,11 @@ export default function TelebirrPage() {
                   {/* Browse File Button - Button Wrapper */}
                   <div className="w-[109px] h-9 flex flex-col items-start gap-2.5">
                     <button 
-                      onClick={handleBrowseFile}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBrowseFile();
+                      }}
                       className="w-[109px] h-9 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md flex items-center justify-center px-4 py-2 hover:bg-[#E5E7EB] transition-colors"
                     >
                       <span className="w-[82px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#121417] whitespace-nowrap">
