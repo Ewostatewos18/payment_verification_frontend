@@ -528,8 +528,8 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
             {/* Action Buttons */}
             <div className="w-[220px] h-10 flex flex-row items-center gap-[18px]">
               
-              {/* Retry Button */}
-              <div className="w-[100px] h-10 flex flex-row justify-center items-center px-8 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
+              {/* Retry Button - Primary Action (Green) */}
+              <div className="w-[100px] h-10 flex flex-row justify-center items-center px-8 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md hover:bg-[#2FB351] transition-colors">
                 <button
                   onClick={onRetry || (() => window.location.reload())}
                   className="w-[36px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#FAFAFA]"
@@ -538,11 +538,11 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
                 </button>
               </div>
 
-              {/* Close Button */}
-              <div className="w-[102px] h-10 flex flex-row justify-center items-center px-8 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
+              {/* Close Button - Secondary Action (Gray) */}
+              <div className="w-[102px] h-10 flex flex-row justify-center items-center px-8 py-2 gap-2 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md hover:bg-[#E5E7EB] transition-colors">
                 <button
                   onClick={onClose}
-                  className="w-[38px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#FAFAFA]"
+                  className="w-[38px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#121417]"
                 >
                   Close
                 </button>
@@ -587,7 +587,7 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
               {displayData?.status === 'Service Unavailable' 
                 ? 'Service Unavailable' 
                 : 'Invalid Transaction ID'}
-            </div>
+        </div>
             
             {/* Status Button */}
             <div className="w-[102px] h-8 flex flex-row justify-center items-center px-3 py-2 gap-2 bg-[#FF383C] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
@@ -623,12 +623,12 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
 
             {/* Close Button */}
             <div className="w-[102px] h-10 flex flex-row justify-center items-center px-8 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
-              <button
-                onClick={onClose}
+          <button
+            onClick={onClose}
                 className="w-[38px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#FAFAFA]"
-              >
-                Close
-              </button>
+          >
+            Close
+          </button>
             </div>
           </div>
         </div>
