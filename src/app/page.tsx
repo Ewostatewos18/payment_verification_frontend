@@ -48,7 +48,7 @@ export default function Home() {
             </div>
 
             {/* Right Content - Logo */}
-            <div className="w-full sm:w-48 h-24 sm:h-32 bg-cover bg-center" style={{ backgroundImage: 'url(/logos/telebirr.png)' }}></div>
+            <div className="w-full sm:w-48 h-24 sm:h-32 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: 'url(/logos/telebirr.png)' }}></div>
           </div>
           
           {/* Clickable Overlay */}
@@ -105,7 +105,7 @@ export default function Home() {
             </div>
 
             {/* Right Content - Logo */}
-            <div className="w-full sm:w-48 h-24 sm:h-32 bg-cover bg-center" style={{ backgroundImage: 'url(/logos/cbe.png)' }}></div>
+            <div className="w-full sm:w-48 h-24 sm:h-32 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: 'url(/logos/cbe.png)' }}></div>
           </div>
           
           {/* Clickable Overlay */}
@@ -115,14 +115,6 @@ export default function Home() {
           ></button>
         </div>
 
-        {/* Next Button Section - Responsive */}
-        <div className="w-full flex flex-row justify-center items-start p-3">
-          <button className="w-24 h-10 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md flex items-center justify-center px-8 py-2 hover:bg-[#2FB351] transition-colors">
-            <span className="w-8 h-5 font-['Inter'] font-medium text-sm leading-5 text-[#FAFAFA] text-center">
-              Next
-            </span>
-          </button>
-        </div>
       </div>
     </div>
   );

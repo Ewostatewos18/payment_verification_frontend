@@ -450,7 +450,7 @@ export default function CBEPage() {
               <div className="w-full max-w-[960px] h-auto min-h-[281px] flex flex-col items-start p-4">
                 {/* Upload Area - Depth 5, Frame 0 */}
                 <div 
-                  className={`w-full max-w-[928px] h-auto min-h-[249px] flex flex-col items-center py-4 px-4 sm:px-6 gap-4 sm:gap-6 border-2 border-dashed border-[#DBE0E6] rounded-lg ${!showCamera && !capturedImageSrc ? 'cursor-pointer' : ''}`}
+                  className={`w-[928px] h-[249px] flex flex-col items-center py-[56px] px-[24px] gap-[24px] border-2 border-dashed border-[#DBE0E6] rounded-lg ${!showCamera && !capturedImageSrc ? 'cursor-pointer' : ''}`}
                   onDragOver={(e) => !showCamera && !capturedImageSrc && e.preventDefault()}
                   onDragLeave={(e) => !showCamera && !capturedImageSrc && e.preventDefault()}
                   onDrop={(e) => {
@@ -561,41 +561,39 @@ export default function CBEPage() {
                   {/* Default Drag and Drop Interface */}
                   {!showCamera && !capturedImageSrc && (
                     <>
-                  {/* Text Content - Depth 6, Frame 0 */}
-                      <div className="w-full max-w-[480px] h-auto min-h-[73px] flex flex-col items-center gap-2">
-                    
-                    {/* Main Text - Depth 7, Frame 0 */}
-                        <div className="w-full max-w-[480px] h-auto min-h-[23px] flex flex-col items-center">
-                          <h3 className="w-full max-w-[480px] h-auto min-h-[23px] font-['Inter'] font-bold text-base sm:text-lg leading-[23px] text-center text-[#121417]">
-                        {selectedFile ? 'File Selected' : 'Drag and drop or browse'}
-                      </h3>
-                    </div>
-                    
-                    {/* Description - Depth 7, Frame 1 */}
-                        <div className="w-full max-w-[480px] h-auto min-h-[42px] flex flex-col items-center">
+                      {/* Depth 6, Frame 0 */}
+                      <div className="flex flex-col items-center p-0 gap-[8px] w-[480px] max-w-[480px] h-[73px]">
+                        
+                        {/* Drag and drop or browse */}
+                        <h3 className="w-[217px] h-[23px] font-['Inter'] font-bold text-[18px] leading-[23px] text-center text-[#121417]">
+                          {selectedFile ? 'File Selected' : 'Drag and drop or browse'}
+                        </h3>
+                        
+                        {/* Depth 7, Frame 1 */}
+                        <div className="flex flex-col items-center p-0 w-[480px] max-w-[480px] h-[42px]">
                       {selectedFile ? (
-                            <p className="w-full max-w-[480px] h-auto min-h-[42px] font-['Inter'] font-normal text-xs sm:text-sm leading-[21px] text-center text-[#34C759] break-words">
+                            <p className="w-[480px] h-[42px] font-['Inter'] font-normal text-[14px] leading-[21px] text-center text-[#34C759] break-words">
                           Selected: {selectedFile.name}
                         </p>
                       ) : (
-                            <p className="w-full max-w-[480px] h-auto min-h-[42px] font-['Inter'] font-normal text-xs sm:text-sm leading-[21px] text-center text-[#121417]">
+                            <p className="w-[480px] h-[42px] font-['Inter'] font-normal text-[14px] leading-[21px] text-center text-[#121417]">
                           Upload a bank statement or a screenshot of a recent transaction from your CBE account.
                         </p>
                       )}
                     </div>
                   </div>
                   
-                  {/* Browse File Button - Button Wrapper */}
-                      <div className="w-full sm:w-[109px] h-9 flex flex-col items-start gap-2.5">
+                      {/* Button Wrapper */}
+                      <div className="flex flex-col items-start p-0 gap-[10px] w-[109px] h-[36px]">
                     <button 
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleBrowseFile();
                           }}
-                          className="w-full sm:w-[109px] h-9 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md flex items-center justify-center px-4 py-2 hover:bg-[#E5E7EB] transition-colors"
+                          className="flex flex-row justify-center items-center p-[8px_16px] gap-[8px] w-[109px] h-[36px] bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-[6px] hover:bg-[#E5E7EB] transition-colors"
                         >
-                          <span className="w-full sm:w-[77px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#121417]">
+                          <span className="w-[77px] h-[20px] font-['Inter'] font-medium text-[14px] leading-[20px] flex items-center text-[#121417]">
                         {selectedFile ? 'Change File' : 'Browse File'}
                       </span>
                     </button>
