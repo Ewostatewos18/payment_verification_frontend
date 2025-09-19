@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExtractedData } from '../../types/verification';
-import { formatCurrency, formatDate, isTestTransaction } from '../../utils/modalHelpers';
+import { formatCurrency, formatDate } from '../../utils/modalHelpers';
 
 interface SuccessModalProps {
   displayData: ExtractedData;
@@ -20,13 +20,13 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
           {/* Success Icon */}
           <div className="w-[60px] h-[60px] flex items-center justify-center">
             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="#10B981" strokeWidth="2" fill="none"/>
-              <path d="M9 12L11 14L15 10" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="12" r="10" stroke="#34C759" strokeWidth="2" fill="none"/>
+              <path d="M9 12L11 14L15 10" stroke="#34C759" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           
           {/* Success Text */}
-          <div className="font-['Inter'] font-bold text-2xl leading-8 text-[#10B981] text-center">
+          <div className="font-['Inter'] font-bold text-2xl leading-8 text-[#34C759] text-center">
             Success
           </div>
 
@@ -36,7 +36,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
           </div>
           
           {/* Status Button */}
-          <div className="w-[124px] h-8 flex flex-row justify-center items-center px-1 py-2 gap-2 bg-[#10B981] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
+          <div className="w-[124px] h-8 flex flex-row justify-center items-center px-1 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
             <span className="font-['Inter'] font-medium text-sm leading-4 flex items-center text-[#FAFAFA]">
               Status: Complete
             </span>
@@ -58,7 +58,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
               <div className="font-['Inter'] font-normal text-sm leading-6 text-[#6B7280]">
                 Sender Name:
               </div>
-              <div className="font-['Inter'] font-semibold text-sm leading-6 text-[#09090B] text-right">
+              <div className="font-['Inter'] font-normal text-sm leading-6 text-[#09090B] text-right">
                 {displayData.sender_name || 'N/A'}
               </div>
             </div>
@@ -68,8 +68,8 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
               <div className="font-['Inter'] font-normal text-sm leading-6 text-[#6B7280]">
                 Sender Bank:
               </div>
-              <div className="font-['Inter'] font-semibold text-sm leading-6 text-[#09090B] text-right">
-                {displayData.sender_bank_name || 'Commercial Bank Of Ethiopia'}
+              <div className="font-['Inter'] font-normal text-sm leading-6 text-[#09090B] text-right">
+                {displayData.sender_bank_name || 'N/A'}
               </div>
             </div>
 
@@ -78,8 +78,8 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
               <div className="font-['Inter'] font-normal text-sm leading-6 text-[#6B7280]">
                 Receiver Name:
               </div>
-              <div className="font-['Inter'] font-semibold text-sm leading-6 text-[#09090B] text-right">
-                {displayData.receiver_name || 'Ayalenesh Worku Belete'}
+              <div className="font-['Inter'] font-normal text-sm leading-6 text-[#09090B] text-right">
+                {displayData.receiver_name || 'N/A'}
               </div>
             </div>
             
@@ -88,7 +88,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
               <div className="font-['Inter'] font-normal text-sm leading-6 text-[#6B7280]">
                 Amount:
               </div>
-              <div className="font-['Inter'] font-semibold text-sm leading-6 text-[#09090B] text-right">
+              <div className="font-['Inter'] font-normal text-sm leading-6 text-[#09090B] text-right">
                 {formatCurrency(displayData.amount)}
               </div>
             </div>
@@ -98,7 +98,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
               <div className="font-['Inter'] font-normal text-sm leading-6 text-[#6B7280]">
                 Date:
               </div>
-              <div className="font-['Inter'] font-semibold text-sm leading-6 text-[#09090B] text-right">
+              <div className="font-['Inter'] font-normal text-sm leading-6 text-[#09090B] text-right">
                 {formatDate(displayData.transaction_date || displayData.date)}
               </div>
             </div>
@@ -107,14 +107,12 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
 
         {/* Close Button - Centered */}
         <div className="flex justify-center">
-          <div className="w-[200px] h-10 flex flex-row justify-center items-center px-6 py-2 gap-2 bg-[#10B981] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
-            <button
-              onClick={onClose}
-              className="font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#FAFAFA]"
-            >
-              Close
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="w-[200px] h-10 flex flex-row justify-center items-center px-6 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md font-['Inter'] font-medium text-sm leading-5 text-[#FAFAFA] hover:bg-[#2FB351] transition-colors"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
