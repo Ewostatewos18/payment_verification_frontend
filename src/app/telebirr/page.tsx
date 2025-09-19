@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Webcam from 'react-webcam';
 import ResultModal from '../../components/ResultModal';
 import { VerificationResponse } from '../../types/verification';
 import { apiClient, ApiResponse } from '../../lib/api';
@@ -14,14 +16,19 @@ export default function TelebirrPage() {
   const [response, setResponse] = useState<VerificationResponse | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'transaction'>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [capturedImageSrc, setCapturedImageSrc] = useState<string | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const webcamRef = useRef<Webcam>(null);
 
 
   const handleTelebirrVerify = async () => {
     if (activeTab === 'upload') {
-        if (!selectedFile) {
+        if (!selectedFile && !capturedImageSrc) {
           setResponse({
             status: 'failed',
-            message: 'Please select an image file to continue with verification.',
+            message: 'Please select an image file or capture a photo to continue with verification.',
             error_type: 'validation'
           } as VerificationResponse);
           return;
@@ -43,8 +50,17 @@ export default function TelebirrPage() {
       let data: ApiResponse;
       
       if (activeTab === 'upload') {
+        // Use captured image if available, otherwise use selected file
+        let fileToUpload = selectedFile;
+        if (capturedImageSrc && !selectedFile) {
+          // Convert base64 to Blob
+          const response = await fetch(capturedImageSrc);
+          const blob = await response.blob();
+          fileToUpload = new File([blob], 'captured-image.png', { type: 'image/png' });
+        }
+        
         data = await apiClient.verifyTelebirrImage({
-          file: selectedFile!,
+          file: fileToUpload!,
         });
       } else {
         data = await apiClient.verifyTelebirrPayment({
@@ -184,21 +200,101 @@ export default function TelebirrPage() {
     input.click();
   };
 
-  const handleUseCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      // For now, we'll just show an alert. In a real app, you'd implement camera capture
-      alert('Camera access granted! Camera capture functionality would be implemented here.');
-      // Stop the stream
-      stream.getTracks().forEach(track => track.stop());
-    } catch {
-      setResponse({
-        status: 'failed',
-        message: 'Unable to access camera. Please check your permissions.',
-        error_type: 'validation'
-      } as VerificationResponse);
-    }
+  const handleUseCamera = () => {
+    setShowCamera(true);
+    setSelectedFile(null); // Clear uploaded file if switching to camera
+    setCapturedImageSrc(null); // Clear captured image
+    setCameraError(null);
+    setIsCameraActive(false); // Reset camera state
   };
+
+  const capture = useCallback(() => {
+    if (!webcamRef.current) {
+      setCameraError('Webcam component not ready. Please wait for camera to initialize.');
+      return;
+    }
+
+    if (!isCameraActive) {
+      setCameraError('Camera is not active. Please wait for camera to start.');
+      return;
+    }
+
+    try {
+      // Try different screenshot methods
+      let imageSrc = null;
+      
+      // Method 1: Standard getScreenshot
+      try {
+        imageSrc = webcamRef.current.getScreenshot();
+      } catch {
+        // Silent fail, try next method
+      }
+      
+      // Method 2: getScreenshot with options
+      if (!imageSrc) {
+        try {
+          imageSrc = webcamRef.current.getScreenshot({
+            width: 1280,
+            height: 720
+          });
+        } catch {
+          // Silent fail, try next method
+        }
+      }
+      
+      // Method 3: Canvas fallback
+      if (!imageSrc) {
+        try {
+          const video = webcamRef.current.video;
+          if (video) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(video, 0, 0);
+              imageSrc = canvas.toDataURL('image/jpeg', 0.8);
+            }
+          }
+        } catch {
+          // Silent fail
+        }
+      }
+      
+      if (imageSrc) {
+        setCapturedImageSrc(imageSrc);
+        setSelectedFile(null); // Clear uploaded file if image is captured
+        setCameraError(null);
+      } else {
+        setCameraError('Failed to capture image. Please try again.');
+      }
+    } catch {
+      setCameraError('Error capturing image. Please try again.');
+    }
+  }, [isCameraActive]);
+
+  const retakePhoto = () => {
+    setCapturedImageSrc(null);
+    setCameraError(null);
+    // Go back to live camera feed
+  };
+
+  const closeCamera = () => {
+    setShowCamera(false);
+    setCapturedImageSrc(null);
+    setCameraError(null);
+    setIsCameraActive(false);
+  };
+
+  // Add a small delay after camera becomes active to ensure it's fully ready
+  useEffect(() => {
+    if (isCameraActive && showCamera) {
+      const timer = setTimeout(() => {
+        // Camera should be ready now
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCameraActive, showCamera]);
 
   return (
     <div className="min-h-screen w-full bg-white flex items-center justify-center p-4">
@@ -291,69 +387,160 @@ export default function TelebirrPage() {
               <>
                 {/* Upload Area - Depth 5, Frame 0 */}
                 <div 
-                  className="w-full max-w-[928px] h-auto min-h-[249px] flex flex-col items-center py-8 sm:py-14 px-4 sm:px-6 gap-4 sm:gap-6 border-2 border-dashed border-[#DBE0E6] rounded-lg"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDragLeave={(e) => e.preventDefault()}
+                  className={`w-full max-w-[928px] h-auto min-h-[249px] flex flex-col items-center py-4 px-4 sm:px-6 gap-4 sm:gap-6 border-2 border-dashed border-[#DBE0E6] rounded-lg ${!showCamera && !capturedImageSrc ? 'cursor-pointer' : ''}`}
+                  onDragOver={(e) => !showCamera && !capturedImageSrc && e.preventDefault()}
+                  onDragLeave={(e) => !showCamera && !capturedImageSrc && e.preventDefault()}
                   onDrop={(e) => {
-                    e.preventDefault();
-                    const files = e.dataTransfer.files;
-                    if (files && files[0]) {
-                      const file = files[0];
-                      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
-                        setSelectedFile(file);
-                      } else {
-                        setResponse({
-                          status: 'failed',
-                          message: 'Please drop an image file or PDF',
-                          error_type: 'validation'
-                        } as VerificationResponse);
+                    if (!showCamera && !capturedImageSrc) {
+                      e.preventDefault();
+                      const files = e.dataTransfer.files;
+                      if (files && files[0]) {
+                        const file = files[0];
+                        if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                          setSelectedFile(file);
+                        } else {
+                          setResponse({
+                            status: 'failed',
+                            message: 'Please drop an image file or PDF',
+                            error_type: 'validation'
+                          } as VerificationResponse);
+                        }
                       }
                     }
                   }}
-                  onClick={handleBrowseFile}
-                  style={{ cursor: 'pointer' }}
+                  onClick={!showCamera && !capturedImageSrc ? handleBrowseFile : undefined}
                 >
                   
-                  {/* Text Content - Depth 6, Frame 0 */}
-                  <div className="w-full max-w-[480px] h-auto min-h-[73px] flex flex-col items-center gap-2">
-                    
-                    {/* Main Text - Depth 7, Frame 0 */}
-                    <div className="w-full max-w-[480px] h-auto min-h-[23px] flex flex-col items-center">
-                      <h3 className="w-full max-w-[480px] h-auto min-h-[23px] font-['Inter'] font-bold text-lg leading-[23px] text-center text-[#121417]">
-                        {selectedFile ? 'File Selected' : 'Drag and drop or browse'}
-                      </h3>
-                    </div>
-                    
-                    {/* Description - Depth 7, Frame 1 */}
-                    <div className="w-full max-w-[480px] h-auto min-h-[42px] flex flex-col items-center">
-                      {selectedFile ? (
-                        <p className="w-full max-w-[480px] h-auto min-h-[42px] font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#34C759] break-words">
-                          Selected: {selectedFile.name}
-                        </p>
-                      ) : (
-                        <p className="w-full max-w-[480px] h-auto min-h-[42px] font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#121417]">
-                          Upload a bank statement or a screenshot of a recent transaction from your Telebirr account.
-                        </p>
+                  {/* Camera Interface */}
+                  {showCamera && (
+                    <>
+                      {cameraError && (
+                        <div className="w-full p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm flex items-center justify-center mb-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                          {cameraError}
+                        </div>
                       )}
+                      
+                      <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden border border-gray-300 mb-4 relative">
+                        {capturedImageSrc ? (
+                          <Image 
+                            src={capturedImageSrc} 
+                            alt="Captured" 
+                            width={512}
+                            height={256}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <>
+                            <Webcam
+                              audio={false}
+                              ref={webcamRef}
+                              screenshotFormat="image/jpeg"
+                              screenshotQuality={0.8}
+                              videoConstraints={{ 
+                                facingMode: 'environment',
+                                width: { ideal: 1280 },
+                                height: { ideal: 720 }
+                              }}
+                          onUserMedia={() => { 
+                            setIsCameraActive(true); 
+                            setCameraError(null);
+                          }}
+                              onUserMediaError={(err) => {
+                                console.error('Camera error:', err);
+                                setCameraError(`Camera access error: ${typeof err === 'object' && 'message' in err ? err.message : String(err) || 'Permission denied or no camera found.'}`);
+                                setIsCameraActive(false);
+                              }}
+                              className="w-full h-full object-cover"
+                            />
+                            {!isCameraActive && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+                                <div className="text-center">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#34C759] mx-auto mb-2"></div>
+                                  <p className="text-sm text-gray-600">Initializing Camera...</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      
+                      {!capturedImageSrc && (
+                        <div className="flex justify-center">
+                          <button
+                            type="button"
+                            onClick={capture}
+                            className="bg-[#34C759] hover:bg-[#2FB351] text-white font-bold py-2 px-6 rounded-md transition-colors disabled:bg-gray-400"
+                            disabled={!isCameraActive || isLoading}
+                          >
+                            {isCameraActive ? 'Capture Image' : 'Initializing Camera...'}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Captured Image Actions */}
+                  {capturedImageSrc && showCamera && (
+                    <div className="flex justify-center">
+                      <button
+                        type="button"
+                        onClick={retakePhoto}
+                        className="bg-[#34C759] hover:bg-[#2FB351] text-white font-bold py-2 px-6 rounded-md transition-colors"
+                      >
+                        Retake
+                      </button>
                     </div>
-                  </div>
-                  
-                  {/* Browse File Button - Button Wrapper */}
-                  <div className="w-full sm:w-[109px] h-9 flex flex-col items-start gap-2.5">
-                    <button 
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleBrowseFile();
-                      }}
-                      className="w-full sm:w-[109px] h-9 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md flex items-center justify-center px-4 py-2 hover:bg-[#E5E7EB] transition-colors"
-                    >
-                      <span className="w-full sm:w-[82px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#121417]">
-                        {selectedFile ? 'Change File' : 'Browse File'}
-                      </span>
-                    </button>
-                  </div>
+                  )}
+
+                  {/* Default Drag and Drop Interface */}
+                  {!showCamera && !capturedImageSrc && (
+                    <>
+                      {/* Text Content - Depth 6, Frame 0 */}
+                      <div className="w-full max-w-[480px] h-auto min-h-[73px] flex flex-col items-center gap-2">
+                        
+                        {/* Main Text - Depth 7, Frame 0 */}
+                        <div className="w-full max-w-[480px] h-auto min-h-[23px] flex flex-col items-center">
+                          <h3 className="w-full max-w-[480px] h-auto min-h-[23px] font-['Inter'] font-bold text-lg leading-[23px] text-center text-[#121417]">
+                            {selectedFile ? 'File Selected' : 'Drag and drop or browse'}
+                          </h3>
+                        </div>
+                        
+                        {/* Description - Depth 7, Frame 1 */}
+                        <div className="w-full max-w-[480px] h-auto min-h-[42px] flex flex-col items-center">
+                          {selectedFile ? (
+                            <p className="w-full max-w-[480px] h-auto min-h-[42px] font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#34C759] break-words">
+                              Selected: {selectedFile.name}
+                            </p>
+                          ) : (
+                            <p className="w-full max-w-[480px] h-auto min-h-[42px] font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#121417]">
+                              Upload a bank statement or a screenshot of a recent transaction from your Telebirr account.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Browse File Button - Button Wrapper */}
+                      <div className="w-full sm:w-[109px] h-9 flex flex-col items-start gap-2.5">
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBrowseFile();
+                          }}
+                          className="w-full sm:w-[109px] h-9 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md flex items-center justify-center px-4 py-2 hover:bg-[#E5E7EB] transition-colors"
+                        >
+                          <span className="w-full sm:w-[82px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#121417]">
+                            {selectedFile ? 'Change File' : 'Browse File'}
+                          </span>
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
+
                 
                 {/* Action Buttons - Depth 4, Frame 5 */}
                 <div className="w-full max-w-[960px] h-auto min-h-[64px] flex mt-4 flex-row justify-center items-start">
@@ -362,11 +549,11 @@ export default function TelebirrPage() {
                     {/* Use Camera Button - Button Wrapper */}
                     <div className="w-full sm:w-[168px] h-9 flex flex-col items-start gap-2.5">
                       <button 
-                        onClick={handleUseCamera}
+                        onClick={showCamera ? closeCamera : handleUseCamera}
                         className="w-full sm:w-[168px] h-9 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md flex items-center justify-center px-4 py-2 hover:bg-[#E5E7EB] transition-colors"
                       >
                         <span className="w-full sm:w-[82px] h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#121417]">
-                          Use Camera
+                          {showCamera ? 'Close Camera' : 'Use Camera'}
                         </span>
                       </button>
                     </div>

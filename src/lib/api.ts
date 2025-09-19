@@ -193,12 +193,6 @@ class ApiClient {
   // Image-based Verification
   async verifyCbeImage(request: FileUploadRequest): Promise<ApiResponse> {
     try {
-      console.log('CBE Image API Request:', {
-        file: request.file?.name,
-        account_number: request.account_number,
-        transaction_id: request.transaction_id
-      });
-      
       const formData = new FormData();
       formData.append('image', request.file);
       if (request.transaction_id) {
@@ -208,18 +202,14 @@ class ApiClient {
         formData.append('account_number', request.account_number);
       }
 
-      console.log('Making CBE API call to:', `${this.client.defaults.baseURL}/image/cbe/verify`);
-      
       const response = await this.client.post('/image/cbe/verify', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       
-      console.log('CBE API Response:', response.data);
       return this.transformResponse(response.data);
     } catch (error) {
-      console.log('CBE API Error:', error);
       throw error;
     }
   }
@@ -305,4 +295,3 @@ class ApiClient {
 
 // Create and export API client instance
 export const apiClient = new ApiClient();
-

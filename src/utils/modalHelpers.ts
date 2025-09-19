@@ -16,12 +16,6 @@ export const isTransactionSuccess = (response: VerificationResponse, displayData
     !!displayData.transaction_date;
 };
 
-// Helper function to check if it's a test transaction
-export const isTestTransaction = (displayData: ExtractedData | undefined): boolean => {
-  return displayData?.sender_name === 'Test User' && 
-    displayData?.receiver_name === 'Test Recipient' && 
-    displayData?.amount === 100;
-};
 
 // Helper function to get error information
 export const getErrorInfo = (response: VerificationResponse) => {
