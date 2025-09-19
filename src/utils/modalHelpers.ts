@@ -8,12 +8,12 @@ export const getDisplayData = (response: VerificationResponse): ExtractedData | 
 // Helper function to check if transaction is successful
 export const isTransactionSuccess = (response: VerificationResponse, displayData: ExtractedData | undefined): boolean => {
   return response.status === 'success' && 
-    displayData && 
-    (displayData.transaction_id || displayData.possible_transaction_id) &&
-    displayData.sender_name &&
-    displayData.receiver_name &&
-    displayData.amount &&
-    displayData.transaction_date;
+    !!displayData && 
+    !!(displayData.transaction_id || displayData.possible_transaction_id) &&
+    !!displayData.sender_name &&
+    !!displayData.receiver_name &&
+    !!displayData.amount &&
+    !!displayData.transaction_date;
 };
 
 // Helper function to check if it's a test transaction
@@ -40,8 +40,8 @@ export const getErrorInfo = (response: VerificationResponse) => {
       };
     case 'invalid_transaction':
       return {
-        title: 'Invalid Transaction',
-        message: 'The transaction ID you entered is invalid or does not exist. Please check and try again.',
+        title: 'Invalid Transaction ID',
+        message: 'Sorry your transaction Id is invalid. Please put the correct ID and retry again.',
         showRetry: false
       };
     case 'validation':
@@ -52,9 +52,9 @@ export const getErrorInfo = (response: VerificationResponse) => {
       };
     default:
       return {
-        title: 'Verification Failed',
-        message: 'Transaction verification failed. Please try again.',
-        showRetry: true
+        title: 'Invalid Transaction ID',
+        message: 'Sorry your transaction Id is invalid. Please put the correct ID and retry again.',
+        showRetry: false
       };
   }
 };

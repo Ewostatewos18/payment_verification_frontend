@@ -9,7 +9,6 @@ export interface ErrorState {
 
 export class ErrorHandler {
   static handle(error: unknown): ErrorState {
-    console.error('ErrorHandler caught:', error);
 
     // Handle API errors
     if (error && typeof error === 'object' && 'message' in error) {

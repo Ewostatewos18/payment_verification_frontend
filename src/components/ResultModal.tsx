@@ -15,7 +15,9 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
   const isSuccess = isTransactionSuccess(response, displayData);
 
   // Handle Manual Verification Required
-  if (response.status === 'Manual_Verification_Required' || displayData?.status === 'Manual Verification Required') {
+  if (response.status === 'Manual_Verification_Required' || 
+      displayData?.status === 'Manual Verification Required' || 
+      displayData?.status === 'Manual Entry Required') {
     return (
       <ManualVerificationModal 
         onClose={onClose} 
@@ -38,7 +40,6 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
   if (isSuccess && displayData) {
     return (
       <SuccessModal 
-        response={response} 
         displayData={displayData} 
         onClose={onClose}
       />

@@ -49,13 +49,9 @@ class ApiClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config) => {
-        console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
-        console.log(`🌍 Environment: ${process.env.NEXT_PUBLIC_ENVIRONMENT || 'development'}`);
-        console.log(`🔗 Base URL: ${API_BASE_URL}`);
         return config;
       },
       (error) => {
-        console.error('❌ Request Error:', error);
         return Promise.reject(error);
       }
     );
@@ -63,12 +59,9 @@ class ApiClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
-        console.log(`✅ API Response: ${response.status} ${response.config.url}`);
-        console.log('📦 Response Data:', response.data);
         return response;
       },
       (error: AxiosError) => {
-        console.error('❌ API Error:', error.response?.status, error.message);
         const apiError = this.handleError(error);
         const errorType = this.getErrorType(error);
         return Promise.reject({
@@ -113,6 +106,8 @@ class ApiClient {
       const status = error.response.status;
       const data = error.response.data as Record<string, unknown>;
       const message = (data?.message as string) || '';
+      const responseData = data?.data as Record<string, unknown>;
+      const responseStatus = responseData?.status as string;
       
       if (status === 408 || message.includes('timeout')) {
         return 'timeout';
@@ -120,6 +115,12 @@ class ApiClient {
       
       if (message.includes('Invalid Transaction ID') || message.includes('Transaction not found')) {
         return 'invalid_transaction';
+      }
+      
+      // Check for Manual Entry Required before categorizing as validation error
+      if (responseStatus === 'Manual Entry Required' || responseStatus === 'Manual Verification Required' ||
+          message.includes('Unable to extract transaction ID from image') && message.includes('Please enter it manually')) {
+        return 'unknown'; // This will be handled specially in the page components
       }
       
       if (status >= 400 && status < 500) {

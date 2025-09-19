@@ -3,7 +3,8 @@
 
 import React, { useState, ChangeEvent, FormEvent, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
-import ResultModal, { VerificationResponse } from './ResultModal';
+import ResultModal from './ResultModal';
+import { VerificationResponse } from '../types/verification';
 import { useRouter } from 'next/navigation';
 
 // --- Type Definitions ---
@@ -186,12 +187,10 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
     try {
       const result = await onVerify(inputMethodForBackend, transactionId, accountNumber, fileToUpload);
       setResponse(result);
-      console.log('Verification Success! Response set to state.');
     } catch (err: unknown) {
       const errorMessage =
         (err instanceof Error ? err.message : String(err)) || 'An unknown error occurred during verification. Please check console for details.';
       setError(errorMessage);
-      console.error('Verification Error:', errorMessage, err);
     } finally {
       setIsLoading(false);
     }
@@ -375,7 +374,6 @@ const BankVerificationLayout: React.FC<BankVerificationLayoutProps> = ({
                       videoConstraints={{ facingMode: 'environment' }}
                       onUserMedia={() => { setIsCameraActive(true); setError(null); }}
                       onUserMediaError={(err) => {
-                        console.error("Webcam user media error:", err);
                         setError(`Camera access error: ${typeof err === 'object' && 'message' in err ? err.message : String(err) || 'Permission denied or no camera found.'}`);
                         setIsCameraActive(false);
                       }}

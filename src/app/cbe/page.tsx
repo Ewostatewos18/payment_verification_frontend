@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ResultModal from '../../components/ResultModal';
-import { VerificationResponse } from '../../components/ResultModal';
+import { VerificationResponse } from '../../types/verification';
 import { apiClient, ApiResponse } from '../../lib/api';
 import { ErrorHandler } from '../../lib/errorHandler';
 
@@ -68,24 +68,32 @@ export default function CBEPage() {
         });
       }
 
-      console.log('🎯 CBE verification result:', data);
       setResponse(data as VerificationResponse);
     } catch (err) {
-      console.log('CBE Error caught:', err);
-      
       // Check if this is a Manual Verification Required response
       if (err && typeof err === 'object') {
-        console.log('Full error object:', err);
-        
         // Check if it's the processed error from API client
         if ('message' in err && 'error_type' in err) {
           const processedError = err as { message: string; error_type: string; status?: number };
-          console.log('Processed error structure:', processedError);
           
           // Check if the message indicates manual verification required
           if (processedError.message.includes('Unable to extract transaction ID from image') && 
               processedError.message.includes('Please enter it manually')) {
-            console.log('Manual verification required detected from processed error');
+            setResponse({
+              status: 'Manual_Verification_Required',
+              message: processedError.message,
+              extracted_data: { transaction_id: undefined }
+            } as VerificationResponse);
+            return;
+          }
+        }
+        
+        // Check if it's an unknown error type but actually manual entry required
+        if ('message' in err && 'error_type' in err) {
+          const processedError = err as { message: string; error_type: string; status?: number };
+          if (processedError.error_type === 'unknown' && 
+              processedError.message.includes('Unable to extract transaction ID from image') && 
+              processedError.message.includes('Please enter it manually')) {
             setResponse({
               status: 'Manual_Verification_Required',
               message: processedError.message,
@@ -100,11 +108,7 @@ export default function CBEPage() {
           const axiosError = err as { response?: { data?: { data?: { status?: string }; message?: string } } };
           const responseData = axiosError.response?.data;
           
-          console.log('Raw response data structure:', responseData);
-          console.log('Checking status:', responseData?.data?.status);
-          
-          if (responseData?.data?.status === 'Manual Verification Required') {
-            console.log('Manual verification required detected from raw response');
+          if (responseData?.data?.status === 'Manual Entry Required' || responseData?.data?.status === 'Manual Verification Required') {
             setResponse({
               status: 'Manual_Verification_Required',
               message: responseData.message,
@@ -117,11 +121,9 @@ export default function CBEPage() {
         // Check if it's a direct error with the message
         if ('message' in err) {
           const directError = err as { message: string };
-          console.log('Direct error message:', directError.message);
           
           if (directError.message.includes('Unable to extract transaction ID from image') && 
               directError.message.includes('Please enter it manually')) {
-            console.log('Manual verification required detected from direct error');
             setResponse({
               status: 'Manual_Verification_Required',
               message: directError.message,
@@ -129,6 +131,21 @@ export default function CBEPage() {
             } as VerificationResponse);
             return;
           }
+        }
+      }
+      
+      // Final fallback: check if the error message contains manual entry keywords
+      if (err && typeof err === 'object' && 'message' in err) {
+        const errorMessage = (err as { message: string }).message;
+        
+        if (errorMessage.includes('manual') || errorMessage.includes('enter') || 
+            errorMessage.includes('Unable to extract') || errorMessage.includes('transaction ID')) {
+          setResponse({
+            status: 'Manual_Verification_Required',
+            message: errorMessage,
+            extracted_data: { transaction_id: undefined }
+          } as VerificationResponse);
+          return;
         }
       }
       
@@ -167,12 +184,6 @@ export default function CBEPage() {
     handleCBEVerify();
   };
 
-  const retryVerification = () => {
-    setResponse(null);
-    setError(null);
-    // Automatically retry the verification with the same form data
-    handleCBEVerify();
-  };
 
 
 
@@ -184,7 +195,6 @@ export default function CBEPage() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         setSelectedFile(file);
-        console.log('File selected:', file.name);
       }
     };
     input.click();
@@ -197,8 +207,7 @@ export default function CBEPage() {
       alert('Camera access granted! Camera capture functionality would be implemented here.');
       // Stop the stream
       stream.getTracks().forEach(track => track.stop());
-    } catch (error) {
-      console.error('Error accessing camera:', error);
+    } catch {
       setResponse({
         status: 'failed',
         message: 'Unable to access camera. Please check your permissions.',
@@ -312,7 +321,6 @@ export default function CBEPage() {
                       const file = files[0];
                       if (file.type.startsWith('image/') || file.type === 'application/pdf') {
                         setSelectedFile(file);
-                        console.log('File dropped:', file.name);
                       } else {
                         setResponse({
                           status: 'failed',
@@ -491,7 +499,6 @@ export default function CBEPage() {
       {response && (
         <ResultModal
           onClose={closeModal}
-          onRetry={retryVerification}
           response={response!}
           onRetry={response?.status === 'Manual_Verification_Required' ? handleSwitchToManualEntry : handleRetry}
         />
