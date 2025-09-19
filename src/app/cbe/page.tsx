@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import ResultModal from '../../components/ResultModal';
 import { VerificationResponse } from '../../components/ResultModal';
 import { apiClient, ApiResponse } from '../../lib/api';
-import { ErrorHandler, ErrorState } from '../../lib/errorHandler';
+import { ErrorHandler } from '../../lib/errorHandler';
 
 export default function CBEPage() {
   const router = useRouter();
@@ -13,7 +13,6 @@ export default function CBEPage() {
   const [accountNumber, setAccountNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<VerificationResponse | null>(null);
-  const [error, setError] = useState<ErrorState | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'transaction'>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -22,27 +21,34 @@ export default function CBEPage() {
     // For upload tab, only require file and account number
     if (activeTab === 'upload') {
       if (!selectedFile || !accountNumber.trim()) {
-        setError({
-          message: 'Please upload an image file and enter account number',
-          type: 'validation',
-          retryable: false
-        });
+        const missingFields = [];
+        if (!selectedFile) missingFields.push('image file');
+        if (!accountNumber.trim()) missingFields.push('account number');
+        
+        setResponse({
+          status: 'failed',
+          message: `Please ${missingFields.join(' and ')} to continue with verification.`,
+          error_type: 'validation'
+        } as VerificationResponse);
         return;
       }
     } else {
       // For transaction tab, require transaction ID and account number
       if (!transactionId.trim() || !accountNumber.trim()) {
-        setError({
-          message: 'Please enter both transaction ID and account number',
-          type: 'validation',
-          retryable: false
-        });
+        const missingFields = [];
+        if (!transactionId.trim()) missingFields.push('transaction ID');
+        if (!accountNumber.trim()) missingFields.push('account number');
+        
+        setResponse({
+          status: 'failed',
+          message: `Please enter ${missingFields.join(' and ')} to continue with verification.`,
+          error_type: 'validation'
+        } as VerificationResponse);
         return;
       }
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       let data: ApiResponse;
@@ -65,8 +71,75 @@ export default function CBEPage() {
       console.log('🎯 CBE verification result:', data);
       setResponse(data as VerificationResponse);
     } catch (err) {
+      console.log('CBE Error caught:', err);
+      
+      // Check if this is a Manual Verification Required response
+      if (err && typeof err === 'object') {
+        console.log('Full error object:', err);
+        
+        // Check if it's the processed error from API client
+        if ('message' in err && 'error_type' in err) {
+          const processedError = err as { message: string; error_type: string; status?: number };
+          console.log('Processed error structure:', processedError);
+          
+          // Check if the message indicates manual verification required
+          if (processedError.message.includes('Unable to extract transaction ID from image') && 
+              processedError.message.includes('Please enter it manually')) {
+            console.log('Manual verification required detected from processed error');
+            setResponse({
+              status: 'Manual_Verification_Required',
+              message: processedError.message,
+              extracted_data: { transaction_id: undefined }
+            } as VerificationResponse);
+            return;
+          }
+        }
+        
+        // Check if it's the raw axios error
+        if ('response' in err) {
+          const axiosError = err as { response?: { data?: { data?: { status?: string }; message?: string } } };
+          const responseData = axiosError.response?.data;
+          
+          console.log('Raw response data structure:', responseData);
+          console.log('Checking status:', responseData?.data?.status);
+          
+          if (responseData?.data?.status === 'Manual Verification Required') {
+            console.log('Manual verification required detected from raw response');
+            setResponse({
+              status: 'Manual_Verification_Required',
+              message: responseData.message,
+              extracted_data: responseData.data
+            } as VerificationResponse);
+            return;
+          }
+        }
+        
+        // Check if it's a direct error with the message
+        if ('message' in err) {
+          const directError = err as { message: string };
+          console.log('Direct error message:', directError.message);
+          
+          if (directError.message.includes('Unable to extract transaction ID from image') && 
+              directError.message.includes('Please enter it manually')) {
+            console.log('Manual verification required detected from direct error');
+            setResponse({
+              status: 'Manual_Verification_Required',
+              message: directError.message,
+              extracted_data: { transaction_id: undefined }
+            } as VerificationResponse);
+            return;
+          }
+        }
+      }
+      
       const errorState = ErrorHandler.handle(err);
-      setError(errorState);
+      
+      // Set response with error information for ResultModal (no more generic error modal)
+      setResponse({
+        status: 'failed',
+        message: errorState.message,
+        error_type: errorState.type as 'network' | 'timeout' | 'invalid_transaction' | 'validation' | 'unknown'
+      } as VerificationResponse);
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +147,24 @@ export default function CBEPage() {
 
   const closeModal = () => {
     setResponse(null);
-    setError(null);
+  };
+
+  const handleSwitchToManualEntry = () => {
+    // Extract transaction ID from response if available
+    const extractedId = response?.extracted_data?.transaction_id || response?.verified_data?.transaction_id;
+    if (extractedId) {
+      setTransactionId(extractedId);
+    }
+    // Switch to transaction tab
+    setActiveTab('transaction');
+    // Close modal
+    closeModal();
+  };
+
+  const handleRetry = () => {
+    // Close modal and retry the same operation
+    closeModal();
+    handleCBEVerify();
   };
 
   const retryVerification = () => {
@@ -109,11 +199,11 @@ export default function CBEPage() {
       stream.getTracks().forEach(track => track.stop());
     } catch (error) {
       console.error('Error accessing camera:', error);
-      setError({
+      setResponse({
+        status: 'failed',
         message: 'Unable to access camera. Please check your permissions.',
-        type: 'validation',
-        retryable: false
-      });
+        error_type: 'validation'
+      } as VerificationResponse);
     }
   };
 
@@ -224,11 +314,11 @@ export default function CBEPage() {
                         setSelectedFile(file);
                         console.log('File dropped:', file.name);
                       } else {
-                        setError({
+                        setResponse({
+                          status: 'failed',
                           message: 'Please drop an image file or PDF',
-                          type: 'validation',
-                          retryable: false
-                        });
+                          error_type: 'validation'
+                        } as VerificationResponse);
                       }
                     }
                   }}
@@ -403,40 +493,10 @@ export default function CBEPage() {
           onClose={closeModal}
           onRetry={retryVerification}
           response={response!}
+          onRetry={response?.status === 'Manual_Verification_Required' ? handleSwitchToManualEntry : handleRetry}
         />
       )}
 
-      {/* Error Modal */}
-      {error && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-red-600 mb-4">Error</h3>
-            <p className="text-gray-700 mb-4">{error.message}</p>
-            {error.details && (
-              <p className="text-sm text-gray-500 mb-6">{error.details}</p>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={closeModal}
-                className="flex-1 bg-[#18181B] text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors"
-              >
-                Close
-              </button>
-              {ErrorHandler.isRetryable(error) && (
-                <button
-                  onClick={() => {
-                    setError(null);
-                    handleCBEVerify();
-                  }}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Retry
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

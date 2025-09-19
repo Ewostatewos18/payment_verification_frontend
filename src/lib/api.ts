@@ -11,6 +11,7 @@ export interface ApiResponse {
   verified_data?: Record<string, unknown>;
   extracted_data?: Record<string, unknown>;
   cbe_extracted_data?: Record<string, unknown>;
+  error_type?: 'network' | 'timeout' | 'invalid_transaction' | 'validation' | 'unknown';
 }
 
 export interface VerificationRequest {
@@ -38,7 +39,7 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '30000'),
+      timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '120000'),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -68,7 +69,12 @@ class ApiClient {
       },
       (error: AxiosError) => {
         console.error('❌ API Error:', error.response?.status, error.message);
-        return Promise.reject(this.handleError(error));
+        const apiError = this.handleError(error);
+        const errorType = this.getErrorType(error);
+        return Promise.reject({
+          ...apiError,
+          error_type: errorType
+        });
       }
     );
   }
@@ -95,6 +101,33 @@ class ApiClient {
         details: error.message,
       };
     }
+  }
+
+  private getErrorType(error: AxiosError): 'network' | 'timeout' | 'invalid_transaction' | 'validation' | 'unknown' {
+    if (error.request && !error.response) {
+      // Network error
+      return 'network';
+    }
+    
+    if (error.response) {
+      const status = error.response.status;
+      const data = error.response.data as Record<string, unknown>;
+      const message = (data?.message as string) || '';
+      
+      if (status === 408 || message.includes('timeout')) {
+        return 'timeout';
+      }
+      
+      if (message.includes('Invalid Transaction ID') || message.includes('Transaction not found')) {
+        return 'invalid_transaction';
+      }
+      
+      if (status >= 400 && status < 500) {
+        return 'validation';
+      }
+    }
+    
+    return 'unknown';
   }
 
   // Health Check

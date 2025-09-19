@@ -2,7 +2,7 @@ import { ApiError } from './api';
 
 export interface ErrorState {
   message: string;
-  type: 'network' | 'server' | 'validation' | 'timeout' | 'unknown';
+  type: 'network' | 'timeout' | 'invalid_transaction' | 'validation' | 'unknown';
   details?: string;
   retryable: boolean;
 }
@@ -15,13 +15,44 @@ export class ErrorHandler {
     if (error && typeof error === 'object' && 'message' in error) {
       const apiError = error as ApiError;
       
-      // Network errors
-      if (apiError.message.includes('Network Error') || apiError.message.includes('Unable to connect')) {
+      // Network connectivity errors (cURL errors, connection refused, etc.)
+      if (apiError.message.includes('Network Error') || 
+          apiError.message.includes('Unable to connect') ||
+          apiError.message.includes('cURL error') ||
+          apiError.message.includes('Failed to connect') ||
+          apiError.message.includes('Connection refused') ||
+          apiError.message.includes('Connection timed out')) {
         return {
-          message: 'Unable to connect to the server. Please check your internet connection.',
+          message: 'Unable to connect to the verification service. This may be due to network restrictions or geographic blocking.',
           type: 'network',
           details: apiError.details,
           retryable: true,
+        };
+      }
+
+      // Service unavailable errors (external API down, maintenance, etc.)
+      if (apiError.message.includes('Service Unavailable') ||
+          apiError.message.includes('temporarily unavailable') ||
+          apiError.message.includes('maintenance') ||
+          apiError.message.includes('unavailable')) {
+        return {
+          message: 'The verification service is temporarily unavailable. Please try again later.',
+          type: 'timeout',
+          details: apiError.details,
+          retryable: true,
+        };
+      }
+
+      // Invalid transaction ID errors
+      if (apiError.message.includes('Invalid Transaction ID') ||
+          apiError.message.includes('Transaction not found') ||
+          apiError.message.includes('Invalid transaction') ||
+          apiError.message.includes('Transaction ID not found')) {
+        return {
+          message: 'Invalid Transaction ID. Please check your transaction ID and try again.',
+          type: 'invalid_transaction',
+          details: apiError.details,
+          retryable: false,
         };
       }
 
@@ -39,7 +70,7 @@ export class ErrorHandler {
       if (apiError.status && apiError.status >= 500) {
         return {
           message: 'Server error occurred. Please try again later.',
-          type: 'server',
+          type: 'unknown',
           details: apiError.details,
           retryable: true,
         };
