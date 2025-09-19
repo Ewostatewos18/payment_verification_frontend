@@ -530,7 +530,7 @@ export default function TelebirrPage() {
                           }}
                           className="flex flex-row justify-center items-center p-[8px_16px] gap-[8px] w-[109px] h-[36px] bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-[6px] hover:bg-[#E5E7EB] transition-colors"
                         >
-                          <span className="w-[77px] h-[20px] font-['Inter'] font-medium text-[14px] leading-[20px] flex items-center text-[#121417]">
+                          <span className="w-[77px] h-[20px] font-['Inter'] font-medium text-[14px] leading-[20px] whitespace-nowrapflex items-center text-[#121417] whitespace-nowrap">
                             {selectedFile ? 'Change File' : 'Browse File'}
                           </span>
                         </button>
