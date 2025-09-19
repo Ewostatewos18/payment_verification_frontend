@@ -570,17 +570,17 @@ export default function CBEPage() {
                         </h3>
                         
                         {/* Depth 7, Frame 1 */}
-                        <div className="flex flex-col items-center p-0 w-[480px] max-w-[480px] h-[42px]">
-                      {selectedFile ? (
-                            <p className="w-[480px] h-[42px] font-['Inter'] font-normal text-[14px] leading-[21px] text-center text-[#34C759] break-words">
-                          Selected: {selectedFile.name}
-                        </p>
-                      ) : (
-                            <p className="w-[480px] h-[42px] font-['Inter'] font-normal text-[14px] leading-[21px] text-center text-[#121417]">
-                          Upload a bank statement or a screenshot of a recent transaction from your CBE account.
-                        </p>
-                      )}
-                    </div>
+                        <div className="flex flex-col items-center p-0 w-full max-w-[480px] h-[42px]">
+                          {selectedFile ? (
+                            <p className="w-full h-[42px] font-['Inter'] font-normal text-[14px] leading-[21px] text-center text-[#34C759] break-words">
+                              Selected: {selectedFile.name}
+                            </p>
+                          ) : (
+                            <p className="w-full h-[42px] font-['Inter'] font-normal text-[14px] leading-[21px] text-center text-[#121417] overflow-hidden text-ellipsis">
+                              Upload a bank statement or a screenshot of a recent transaction from your CBE account.
+                            </p>
+                          )}
+                        </div>
                   </div>
                   
                       {/* Button Wrapper */}
