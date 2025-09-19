@@ -70,6 +70,12 @@ export default function CBEPage() {
 
       setResponse(data as VerificationResponse);
     } catch (err) {
+      // Debug logging to see what error we're getting
+      console.log('CBE Error Details:', err);
+      console.log('Error type:', typeof err);
+      console.log('Error message:', err?.message);
+      console.log('Error response data:', err?.response?.data);
+      
       // Check if this is a Manual Verification Required response
       if (err && typeof err === 'object') {
         // Check if it's the processed error from API client
@@ -132,6 +138,49 @@ export default function CBEPage() {
             return;
           }
         }
+      }
+      
+      // More aggressive manual verification detection
+      const errorMessage = (err as { message?: string; response?: { data?: { message?: string } } })?.message || (err as { response?: { data?: { message?: string } } })?.response?.data?.message || '';
+      const responseData = (err as { response?: { data?: Record<string, unknown> } })?.response?.data;
+      
+      // Check for manual verification keywords in multiple places
+      if (errorMessage.includes('manual') || 
+          errorMessage.includes('extract') || 
+          errorMessage.includes('transaction ID') ||
+          errorMessage.includes('Unable to extract') ||
+          errorMessage.includes('enter it manually') ||
+          (responseData as { data?: { status?: string } })?.data?.status === 'Manual Entry Required' ||
+          (responseData as { data?: { status?: string } })?.data?.status === 'Manual Verification Required' ||
+          (responseData as { status?: string })?.status === 'Manual Entry Required' ||
+          (responseData as { status?: string })?.status === 'Manual Verification Required') {
+        
+        console.log('Manual verification detected!');
+        setResponse({
+          status: 'Manual_Verification_Required',
+          message: errorMessage || 'Unable to extract transaction ID from image. Please enter it manually.',
+          extracted_data: { transaction_id: undefined }
+        } as VerificationResponse);
+        return;
+      }
+      
+      // Handle timeout/network errors as potential manual verification cases
+      if (errorMessage.includes('timeout') || 
+          errorMessage.includes('Network Error') ||
+          errorMessage.includes('Unable to connect') ||
+          (err && typeof err === 'object' && 'error_type' in err && (err as { error_type?: string }).error_type === 'timeout')) {
+        
+        console.log('Network/timeout error detected - suggesting manual entry');
+        console.log('Error message:', errorMessage);
+        console.log('Error type:', (err as { error_type?: string })?.error_type);
+        console.log('Error details:', err);
+        
+        setResponse({
+          status: 'Manual_Verification_Required',
+          message: 'Image processing timed out. Please enter the transaction ID manually.',
+          extracted_data: { transaction_id: undefined }
+        } as VerificationResponse);
+        return;
       }
       
       // Final fallback: check if the error message contains manual entry keywords
