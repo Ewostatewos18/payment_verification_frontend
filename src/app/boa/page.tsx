@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Webcam from 'react-webcam';
 import ResultModal from '../../components/ResultModal';
+import HistoryInput from '../../components/HistoryInput';
 import { VerificationResponse } from '../../types/verification';
 import { apiClient, ApiResponse } from '../../lib/api';
-import { ErrorHandler } from '../../lib/errorHandler'; 
+import { ErrorHandler } from '../../lib/errorHandler';
+import { VerificationHistory } from '../../utils/verificationHistory'; 
 
 export default function BoaPage() {
   const router = useRouter();
@@ -55,6 +57,13 @@ export default function BoaPage() {
 
     setIsLoading(true);
 
+    // Record the verification attempt in history
+    const attemptId = VerificationHistory.addAttempt('boa', {
+      accountNumber: accountNumber,
+      transactionId: activeTab === 'transaction' ? transactionId : undefined,
+      status: 'pending'
+    });
+
     try {
       let data: ApiResponse;
       
@@ -79,6 +88,8 @@ export default function BoaPage() {
       });
       }
 
+      // Update attempt status to success
+      VerificationHistory.updateAttemptStatus('boa', attemptId, 'success');
       setResponse(data as VerificationResponse);
     } catch (err) {
       // Check if this is a Manual Verification Required response
@@ -159,6 +170,9 @@ export default function BoaPage() {
           return;
         }
       }
+      
+      // Update attempt status to failed
+      VerificationHistory.updateAttemptStatus('boa', attemptId, 'failed', 'network');
       
       const errorState = ErrorHandler.handle(err);
       
@@ -552,24 +566,16 @@ export default function BoaPage() {
               </div>
 
 
-              {/* Account Number Input - Responsive */}
+              {/* Account Number Input with History */}
               <div className="w-full h-auto flex flex-col items-start gap-2 mt-6">
-                
-                {/* Label */}
-                <label className="w-full font-['Inter'] font-medium text-sm leading-[14px] text-[#18181B]">
-                  Account Number
-                </label>
-                
-                {/* Input Wrapper */}
-                <div className="w-full h-9 flex flex-col items-start gap-2">
-                  <input
-                    type="text"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder="Enter Account Number"
-                    className="w-full h-9 px-3 py-1 border border-[#E4E4E7] rounded-md font-['Inter'] font-normal text-sm leading-5 text-[#121417] placeholder:text-[#71717A] placeholder:font-['Inter'] placeholder:font-normal placeholder:text-sm placeholder:leading-5 focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:border-transparent"
-                  />
-                </div>
+                <HistoryInput
+                  value={accountNumber}
+                  onChange={setAccountNumber}
+                  placeholder="Enter Account Number"
+                  label="Account Number"
+                  bank="boa"
+                  type="accountNumber"
+                />
               </div>
             </>
           ) : (
@@ -578,44 +584,28 @@ export default function BoaPage() {
               {/* Input Section - Depth 4, Frame 4 */}
               <div className="w-full max-w-[960px] h-auto min-h-[158px] flex flex-col items-start p-4 gap-2.5">
                 
-                {/* Transaction ID Input - Input / Basic */}
-                <div className="w-full max-w-[928px] h-auto min-h-[58px] flex flex-col items-start gap-2">
-                  
-                  {/* Label */}
-                  <label className="w-full max-w-[928px] h-auto min-h-[14px] font-['Inter'] font-medium text-sm leading-[14px] text-[#18181B]">
-                    Transaction ID
-                  </label>
-                  
-                  {/* Input Wrapper */}
-                  <div className="w-full max-w-[928px] h-9 flex flex-col items-start gap-2">
-                    <input
-                      type="text"
-                      value={transactionId}
-                      onChange={(e) => setTransactionId(e.target.value)}
-                      placeholder="Enter Transaction ID"
-                      className="w-full max-w-[928px] h-9 px-3 py-1 border border-[#E4E4E7] rounded-md font-['Inter'] font-normal text-sm leading-5 text-[#121417] placeholder:text-[#71717A] placeholder:font-['Inter'] placeholder:font-normal placeholder:text-sm placeholder:leading-5 focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:border-transparent"
-                    />
-                  </div>
+                {/* Transaction ID Input with History */}
+                <div className="w-full h-auto flex flex-col items-start gap-2">
+                  <HistoryInput
+                    value={transactionId}
+                    onChange={setTransactionId}
+                    placeholder="Enter Transaction ID"
+                    label="Transaction ID"
+                    bank="boa"
+                    type="transactionId"
+                  />
                 </div>
 
-                {/* Account Number Input - Input / Basic */}
-                <div className="w-full max-w-[928px] h-auto min-h-[58px] flex flex-col items-start gap-2">
-                  
-                  {/* Label */}
-                  <label className="w-full max-w-[928px] h-auto min-h-[14px] font-['Inter'] font-medium text-sm leading-[14px] text-[#18181B]">
-                    Account Number
-                  </label>
-                  
-                  {/* Input Wrapper */}
-                  <div className="w-full max-w-[928px] h-9 flex flex-col items-start gap-2">
-                    <input
-                      type="text"
-                      value={accountNumber}
-                      onChange={(e) => setAccountNumber(e.target.value)}
-                      placeholder="Enter Account Number"
-                      className="w-full max-w-[928px] h-9 px-3 py-1 border border-[#E4E4E7] rounded-md font-['Inter'] font-normal text-sm leading-5 text-[#121417] placeholder:text-[#71717A] placeholder:font-['Inter'] placeholder:font-normal placeholder:text-sm placeholder:leading-5 focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:border-transparent"
-                    />
-                  </div>
+                {/* Account Number Input with History */}
+                <div className="w-full h-auto flex flex-col items-start gap-2">
+                  <HistoryInput
+                    value={accountNumber}
+                    onChange={setAccountNumber}
+                    placeholder="Enter Account Number"
+                    label="Account Number"
+                    bank="boa"
+                    type="accountNumber"
+                  />
                 </div>
               </div>
             </>

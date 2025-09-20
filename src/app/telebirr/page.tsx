@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Webcam from 'react-webcam';
 import ResultModal from '../../components/ResultModal';
+import HistoryInput from '../../components/HistoryInput';
 import { VerificationResponse } from '../../types/verification';
 import { apiClient, ApiResponse } from '../../lib/api';
 import { ErrorHandler } from '../../lib/errorHandler';
+import { VerificationHistory } from '../../utils/verificationHistory';
 
 export default function TelebirrPage() {
   const router = useRouter();
@@ -46,6 +48,12 @@ export default function TelebirrPage() {
 
     setIsLoading(true);
 
+    // Record the verification attempt in history
+    const attemptId = VerificationHistory.addAttempt('telebirr', {
+      transactionId: activeTab === 'transaction' ? transactionId : undefined,
+      status: 'pending'
+    });
+
     try {
       let data: ApiResponse;
       
@@ -68,6 +76,8 @@ export default function TelebirrPage() {
       });
       }
 
+      // Update attempt status to success
+      VerificationHistory.updateAttemptStatus('telebirr', attemptId, 'success');
       setResponse(data as VerificationResponse);
     } catch (err) {
       // Check if this is a Manual Verification Required response
@@ -148,6 +158,9 @@ export default function TelebirrPage() {
           return;
         }
       }
+      
+      // Update attempt status to failed
+      VerificationHistory.updateAttemptStatus('telebirr', attemptId, 'failed', 'network');
       
       const errorState = ErrorHandler.handle(err);
       
@@ -508,21 +521,21 @@ export default function TelebirrPage() {
                         
                         {/* Description */}
                         <div className="flex flex-col items-center p-0 w-full h-auto">
-                          {selectedFile ? (
+                      {selectedFile ? (
                             <p className="w-full font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#34C759] break-words">
-                              Selected: {selectedFile.name}
-                            </p>
-                          ) : (
+                          Selected: {selectedFile.name}
+                        </p>
+                      ) : (
                             <p className="w-full font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#121417]">
-                              Upload a bank statement or a screenshot of a recent transaction from your Telebirr account.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      
+                          Upload a bank statement or a screenshot of a recent transaction from your Telebirr account.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
                       {/* Button Wrapper - Responsive */}
                       <div className="flex flex-col items-center p-0 gap-2 w-auto h-auto">
-                        <button 
+                    <button 
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -531,10 +544,10 @@ export default function TelebirrPage() {
                           className="flex flex-row justify-center items-center px-4 py-2 gap-2 w-auto h-9 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md hover:bg-[#E5E7EB] transition-colors"
                         >
                           <span className="font-['Inter'] font-medium text-sm leading-5 whitespace-nowrap text-[#121417]">
-                            {selectedFile ? 'Change File' : 'Browse File'}
-                          </span>
-                        </button>
-                      </div>
+                        {selectedFile ? 'Change File' : 'Browse File'}
+                      </span>
+                    </button>
+                  </div>
                     </>
                   )}
                 </div>
@@ -575,24 +588,16 @@ export default function TelebirrPage() {
               /* Transaction ID Input Area - Responsive */
               <div className="w-full h-auto flex flex-col items-start">
                 
-                {/* Input - Responsive */}
+                {/* Transaction ID Input with History */}
                 <div className="w-full h-auto mb-6 flex flex-col items-start gap-2">
-                  
-                  {/* Label */}
-                  <label className="w-full font-['Inter'] font-medium text-sm leading-[14px] text-[#18181B]">
-                    Transaction ID
-                  </label>
-                  
-                  {/* Input Wrapper */}
-                  <div className="w-full h-9 flex flex-col items-start gap-2">
-                    <input
-                      type="text"
-                      value={transactionId}
-                      onChange={(e) => setTransactionId(e.target.value)}
-                      placeholder="Enter Telebirr Transaction ID"
-                      className="w-full h-9 px-3 py-2 border border-[#E4E4E7] rounded-md font-['Inter'] font-normal text-sm leading-5 text-[#121417] placeholder:text-[#71717A] placeholder:font-['Inter'] placeholder:font-normal placeholder:text-sm placeholder:leading-5 focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:border-transparent"
-                    />
-                  </div>
+                  <HistoryInput
+                    value={transactionId}
+                    onChange={setTransactionId}
+                    placeholder="Enter Telebirr Transaction ID"
+                    label="Transaction ID"
+                    bank="telebirr"
+                    type="transactionId"
+                  />
                 </div>
                 
                 {/* Verify Button Section - Responsive */}
