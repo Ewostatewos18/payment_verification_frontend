@@ -348,7 +348,7 @@ export default function TelebirrPage() {
              </div>
 
               {/* Right Content - Logo - Responsive */}
-              <div className="w-full sm:w-auto sm:max-w-[327px] h-16 sm:h-[127px] bg-contain bg-no-repeat bg-center" style={{ backgroundImage: 'url(/logos/telebirr.png)' }}></div>
+              <div className="w-full sm:w-[400px] h-16 sm:h-[150px] bg-contain bg-no-repeat bg-center" style={{ backgroundImage: 'url(/logos/telebirr.png)' }}></div>
             </div>
           </div>
 

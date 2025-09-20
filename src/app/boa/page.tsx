@@ -519,21 +519,21 @@ export default function BoaPage() {
                         
                         {/* Description */}
                         <div className="flex flex-col items-center p-0 w-full h-auto">
-                          {selectedFile ? (
+                      {selectedFile ? (
                             <p className="w-full font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#34C759] break-words">
-                              Selected: {selectedFile.name}
-                            </p>
-                          ) : (
+                          Selected: {selectedFile.name}
+                        </p>
+                      ) : (
                             <p className="w-full font-['Inter'] font-normal text-sm leading-[21px] text-center text-[#121417]">
-                              Upload a bank statement or a screenshot of a recent transaction from your BOA account.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      
+                          Upload a bank statement or a screenshot of a recent transaction from your BOA account.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
                       {/* Button Wrapper - Responsive */}
                       <div className="flex flex-col items-center p-0 gap-2 w-auto h-auto">
-                        <button 
+                    <button 
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -542,10 +542,10 @@ export default function BoaPage() {
                           className="flex flex-row justify-center items-center px-4 py-2 gap-2 w-auto h-9 bg-[#F0F2F5] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md hover:bg-[#E5E7EB] transition-colors"
                         >
                           <span className="font-['Inter'] font-medium text-sm leading-5 whitespace-nowrap text-[#121417]">
-                            {selectedFile ? 'Change File' : 'Browse File'}
-                          </span>
-                        </button>
-                      </div>
+                        {selectedFile ? 'Change File' : 'Browse File'}
+                      </span>
+                    </button>
+                  </div>
                     </>
                   )}
                 </div>
