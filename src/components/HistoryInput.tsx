@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { VerificationHistory, VerificationAttempt } from '../utils/verificationHistory';
 
 interface HistoryInputProps {
@@ -11,6 +11,7 @@ interface HistoryInputProps {
   bank: 'telebirr' | 'boa' | 'cbe';
   type: 'transactionId' | 'accountNumber';
   className?: string;
+  onEnterPress?: () => void;
 }
 
 const HistoryInput: React.FC<HistoryInputProps> = ({
@@ -21,6 +22,7 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
   bank,
   type,
   className,
+  onEnterPress,
 }) => {
   const [history, setHistory] = useState<VerificationAttempt[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -28,15 +30,15 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    loadHistory();
-  }, [bank, type]);
-
-  const loadHistory = () => {
+  const loadHistory = useCallback(() => {
     const allAttempts = VerificationHistory.getHistory(bank);
     setHistory(allAttempts);
     setFilteredHistory(allAttempts);
-  };
+  }, [bank]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [bank, type, loadHistory]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -53,6 +55,15 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
 
   const handleInputFocus = () => {
     setShowDropdown(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && onEnterPress) {
+      e.preventDefault();
+      e.stopPropagation();
+      setShowDropdown(false);
+      onEnterPress();
+    }
   };
 
   const handleSelectHistory = (attempt: VerificationAttempt) => {
@@ -106,6 +117,7 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
         value={value}
         onChange={handleInputChange}
         onFocus={handleInputFocus}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={`w-full h-9 px-3 py-2 border border-[#E4E4E7] rounded-md font-['Inter'] font-normal text-sm leading-5 text-[#121417] placeholder:text-[#71717A] placeholder:font-['Inter'] placeholder:font-normal placeholder:text-sm placeholder:leading-5 focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:border-transparent ${className}`}
       />

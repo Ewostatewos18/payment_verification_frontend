@@ -627,6 +627,7 @@ export default function CBEPage() {
                   label="Account Number"
                   bank="cbe"
                   type="accountNumber"
+                  onEnterPress={handleCBEVerify}
                 />
               </div>
             </>
@@ -645,6 +646,7 @@ export default function CBEPage() {
                     label="Transaction ID"
                     bank="cbe"
                     type="transactionId"
+                    onEnterPress={handleCBEVerify}
                   />
                 </div>
 
@@ -657,6 +659,7 @@ export default function CBEPage() {
                     label="Account Number"
                     bank="cbe"
                     type="accountNumber"
+                    onEnterPress={handleCBEVerify}
                   />
                 </div>
               </div>

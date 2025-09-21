@@ -569,13 +569,14 @@ export default function BoaPage() {
               {/* Account Number Input with History */}
               <div className="w-full h-auto flex flex-col items-start gap-2 mt-6">
                 <HistoryInput
-                  value={accountNumber}
+                    value={accountNumber}
                   onChange={setAccountNumber}
-                  placeholder="Enter Account Number"
+                    placeholder="Enter Account Number"
                   label="Account Number"
                   bank="boa"
                   type="accountNumber"
-                />
+                  onEnterPress={handleBoaVerify}
+                  />
               </div>
             </>
           ) : (
@@ -586,26 +587,28 @@ export default function BoaPage() {
                 
                 {/* Transaction ID Input with History */}
                 <div className="w-full h-auto flex flex-col items-start gap-2">
-                  <HistoryInput
-                    value={transactionId}
-                    onChange={setTransactionId}
-                    placeholder="Enter Transaction ID"
-                    label="Transaction ID"
-                    bank="boa"
-                    type="transactionId"
-                  />
+                <HistoryInput
+                      value={transactionId}
+                  onChange={setTransactionId}
+                      placeholder="Enter Transaction ID"
+                  label="Transaction ID"
+                  bank="boa"
+                  type="transactionId"
+                  onEnterPress={handleBoaVerify}
+                    />
                 </div>
 
                 {/* Account Number Input with History */}
                 <div className="w-full h-auto flex flex-col items-start gap-2">
                   <HistoryInput
-                    value={accountNumber}
+                      value={accountNumber}
                     onChange={setAccountNumber}
-                    placeholder="Enter Account Number"
+                      placeholder="Enter Account Number"
                     label="Account Number"
                     bank="boa"
                     type="accountNumber"
-                  />
+                    onEnterPress={handleBoaVerify}
+                    />
                 </div>
               </div>
             </>

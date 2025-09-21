@@ -591,13 +591,14 @@ export default function TelebirrPage() {
                 {/* Transaction ID Input with History */}
                 <div className="w-full h-auto mb-6 flex flex-col items-start gap-2">
                   <HistoryInput
-                    value={transactionId}
+                      value={transactionId}
                     onChange={setTransactionId}
-                    placeholder="Enter Telebirr Transaction ID"
+                      placeholder="Enter Telebirr Transaction ID"
                     label="Transaction ID"
                     bank="telebirr"
                     type="transactionId"
-                  />
+                    onEnterPress={handleTelebirrVerify}
+                    />
                 </div>
                 
                 {/* Verify Button Section - Responsive */}
