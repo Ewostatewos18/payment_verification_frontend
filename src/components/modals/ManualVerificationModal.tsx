@@ -7,7 +7,7 @@ interface ManualVerificationModalProps {
 
 const ManualVerificationModal: React.FC<ManualVerificationModalProps> = ({ onClose, onRetry }) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
       {/* Main Card - Responsive */}
       <div className="w-full max-w-[559px] h-auto min-h-[300px] sm:min-h-[350px] flex flex-col items-center p-4 sm:p-6 gap-4 bg-white border border-[#E4E4E7] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-xl">
         
@@ -42,31 +42,27 @@ const ManualVerificationModal: React.FC<ManualVerificationModalProps> = ({ onClo
           </div>
 
           {/* Action Buttons - Responsive */}
-          <div className="w-full h-auto flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+          <div className="w-full h-auto flex flex-col sm:flex-row items-center justify-center gap-3">
             
             {/* Switch to Manual Entry Button - Responsive */}
-            <div className="w-full sm:w-[150px] h-10 flex flex-row justify-center items-center px-6 py-2 gap-2 bg-[#3B82F6] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
-              <button
-                onClick={() => {
-                  // This will be handled by the parent component
-                  if (onRetry) onRetry();
-                  onClose();
-                }}
-                className="w-auto h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#FAFAFA]"
-              >
-                Switch to Manual Entry
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                if (onRetry) onRetry();
+                onClose();
+              }}
+              className="min-w-[150px] sm:w-[150px] h-10 flex flex-row justify-center items-center px-6 py-2 gap-2 bg-[#3B82F6] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md font-['Inter'] font-medium text-sm leading-5 text-[#FAFAFA]"
+            >
+              Switch to Manual Entry
+            </button>
 
             {/* Close Button - Responsive */}
-            <div className="w-full sm:w-[100px] h-10 flex flex-row justify-center items-center px-4 py-2 gap-2 bg-[#E5E7EB] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
-              <button
-                onClick={onClose}
-                className="w-auto h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#374151]"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              className="min-w-[100px] sm:w-[100px] h-10 flex flex-row justify-center items-center px-4 py-2 gap-2 bg-[#E5E7EB] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md font-['Inter'] font-medium text-sm leading-5 text-[#374151]"
+              aria-label="Close manual verification modal"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>

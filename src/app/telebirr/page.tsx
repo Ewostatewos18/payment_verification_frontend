@@ -628,7 +628,8 @@ export default function TelebirrPage() {
         <ResultModal
           onClose={closeModal}
           response={response!}
-              onRetry={response?.status === 'Manual_Verification_Required' ? handleSwitchToManualEntry : handleRetry}
+          allowManual={activeTab !== 'transaction'}
+          onRetry={response?.status === 'Manual_Verification_Required' ? handleSwitchToManualEntry : handleRetry}
             />
           )}
 

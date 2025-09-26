@@ -12,7 +12,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ response, onClose, onRetry }) =
   const errorInfo = getErrorInfo(response);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
       {/* Main Card - Responsive */}
       <div className="w-full max-w-[559px] h-auto min-h-[300px] sm:min-h-[364px] bg-white border border-[#E4E4E7] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-xl flex flex-col items-center p-4 sm:p-6 gap-4">
         
@@ -66,7 +66,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ response, onClose, onRetry }) =
             
             {/* Retry Button - Responsive - Only show if not Invalid Transaction ID */}
             {errorInfo.showRetry && onRetry && errorInfo.title !== 'Invalid Transaction ID' && (
-              <button
+            <button
                 onClick={onRetry}
                 className="w-full sm:w-[100px] h-10 flex flex-row justify-center items-center px-8 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md"
               >
@@ -80,6 +80,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ response, onClose, onRetry }) =
             <button
               onClick={onClose}
               className="w-full sm:w-[102px] h-10 flex flex-row justify-center items-center px-8 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md"
+              aria-label="Close error modal"
             >
               <span className="w-auto h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center text-[#FAFAFA]">
                 Close
@@ -92,4 +93,4 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ response, onClose, onRetry }) =
   );
 };
 
-export default ErrorModal;
+export default React.memo(ErrorModal);

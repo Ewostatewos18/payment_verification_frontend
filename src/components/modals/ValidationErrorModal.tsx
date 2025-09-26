@@ -11,7 +11,7 @@ const ValidationErrorModal: React.FC<ValidationErrorModalProps> = ({ response, o
   const errorInfo = getErrorInfo(response);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
       <div className="w-full max-w-[559px] h-auto min-h-[300px] sm:min-h-[350px] flex flex-col items-center p-4 sm:p-6 gap-4 bg-white border border-[#E4E4E7] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-xl">
         <div className="w-full h-auto relative bg-white flex flex-col items-center justify-center">
           <div className="w-12 h-12 sm:w-[50px] sm:h-[50px] flex items-center justify-center mb-4">
@@ -32,14 +32,13 @@ const ValidationErrorModal: React.FC<ValidationErrorModalProps> = ({ response, o
             {errorInfo.message}
           </div>
           <div className="w-full h-auto flex flex-row justify-center items-center">
-            <div className="w-full sm:w-[200px] h-10 flex flex-row justify-center items-center px-6 py-2 gap-2 bg-[#3B82F6] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md">
-              <button
-                onClick={onClose}
-                className="w-auto h-5 font-['Inter'] font-medium text-sm leading-5 flex items-center justify-center text-[#FAFAFA]"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              className="w-full sm:w-[200px] h-10 flex flex-row justify-center items-center px-6 py-2 gap-2 bg-[#3B82F6] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md font-['Inter'] font-medium text-sm leading-5 text-[#FAFAFA]"
+              aria-label="Close validation error modal"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
