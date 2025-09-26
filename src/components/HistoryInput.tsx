@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { VerificationHistory, VerificationAttempt } from '../utils/verificationHistory';
 
 interface HistoryInputProps {
@@ -27,6 +27,7 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
   const [history, setHistory] = useState<VerificationAttempt[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredHistory, setFilteredHistory] = useState<VerificationAttempt[]>([]);
+  const debounceTimerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -43,14 +44,20 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
-    
-    // Filter history based on input
-    const filtered = history.filter(attempt => {
-      const attemptValue = type === 'transactionId' ? attempt.transactionId : attempt.accountNumber;
-      return attemptValue?.toLowerCase().includes(newValue.toLowerCase());
-    });
-    setFilteredHistory(filtered);
-    setShowDropdown(true);
+
+    // Debounce filtering to avoid work on every keystroke
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = window.setTimeout(() => {
+      const lower = newValue.toLowerCase();
+      const filtered = history.filter((attempt) => {
+        const attemptValue = type === 'transactionId' ? attempt.transactionId : attempt.accountNumber;
+        return attemptValue ? attemptValue.toLowerCase().includes(lower) : false;
+      });
+      setFilteredHistory(filtered.slice(0, 50));
+      setShowDropdown(true);
+    }, 120);
   };
 
   const handleInputFocus = () => {
@@ -94,17 +101,18 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
   }, []);
 
 
-  // Group attempts by value for better display
-  const groupedHistory = filteredHistory.reduce((acc, attempt) => {
-    const attemptValue = type === 'transactionId' ? attempt.transactionId : attempt.accountNumber;
-    if (!attemptValue) return acc;
-    
-    if (!acc[attemptValue]) {
-      acc[attemptValue] = [];
-    }
-    acc[attemptValue].push(attempt);
-    return acc;
-  }, {} as Record<string, VerificationAttempt[]>);
+  // Group attempts by value for better display (memoized)
+  const groupedHistory = useMemo(() => {
+    return filteredHistory.reduce((acc, attempt) => {
+      const attemptValue = type === 'transactionId' ? attempt.transactionId : attempt.accountNumber;
+      if (!attemptValue) return acc;
+      if (!acc[attemptValue]) {
+        acc[attemptValue] = [];
+      }
+      acc[attemptValue].push(attempt);
+      return acc;
+    }, {} as Record<string, VerificationAttempt[]>);
+  }, [filteredHistory, type]);
 
   return (
     <div className="relative w-full">
@@ -148,4 +156,4 @@ const HistoryInput: React.FC<HistoryInputProps> = ({
   );
 };
 
-export default HistoryInput;
+export default React.memo(HistoryInput);

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+// Use native img for base64 data/camera preview to avoid Next image overhead
+// eslint-disable-next-line @next/next/no-img-element
 import Webcam from 'react-webcam';
 import ResultModal from '../../components/ResultModal';
 import HistoryInput from '../../components/HistoryInput';
@@ -187,51 +188,53 @@ export default function BoaPage() {
     }
   };
 
-  const closeModal = () => {
-    setResponse(null);
-  };
+  const closeModal = useCallback(() => {
+    startTransition(() => setResponse(null));
+  }, []);
 
-  const handleSwitchToManualEntry = () => {
+  const handleSwitchToManualEntry = useCallback(() => {
     // Extract transaction ID from response if available
     const extractedId = response?.extracted_data?.transaction_id || response?.verified_data?.transaction_id;
     if (extractedId) {
-      setTransactionId(extractedId);
+      startTransition(() => setTransactionId(extractedId));
     }
     // Switch to transaction tab
-    setActiveTab('transaction');
+    startTransition(() => setActiveTab('transaction'));
     // Close modal
     closeModal();
-  };
+  }, [response, closeModal]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     // Close modal and retry the same operation
     closeModal();
     handleBoaVerify();
-  };
+  }, [closeModal]);
 
 
 
 
-  const handleBrowseFile = () => {
+  const handleBrowseFile = useCallback(() => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*,.pdf';
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        setSelectedFile(file);
+        startTransition(() => setSelectedFile(file));
       }
     };
     input.click();
-  };
+  }, []);
 
-  const handleUseCamera = () => {
-    setShowCamera(true);
-    setSelectedFile(null); // Clear uploaded file if switching to camera
-    setCapturedImageSrc(null); // Clear captured image
-    setCameraError(null);
-    setIsCameraActive(false); // Reset camera state
-  };
+  const handleUseCamera = useCallback(() => {
+    startTransition(() => {
+      setShowCamera(true);
+      setSelectedFile(null);
+      setCapturedImageSrc(null);
+      setCameraError(null);
+      setIsCameraActive(false);
+    });
+  }, []);
 
   const capture = useCallback(() => {
     if (!webcamRef.current) {
@@ -298,18 +301,25 @@ export default function BoaPage() {
     }
   }, [isCameraActive]);
 
-  const retakePhoto = () => {
-    setCapturedImageSrc(null);
-    setCameraError(null);
-    // Go back to live camera feed
-  };
+  const retakePhoto = useCallback(() => {
+    startTransition(() => {
+      setCapturedImageSrc(null);
+      setCameraError(null);
+    });
+  }, []);
 
-  const closeCamera = () => {
-    setShowCamera(false);
-    setCapturedImageSrc(null);
-    setCameraError(null);
-    setIsCameraActive(false);
-  };
+  const closeCamera = useCallback(() => {
+    try {
+      const mediaStream = (webcamRef.current?.video?.srcObject as MediaStream | null);
+      mediaStream?.getTracks().forEach((t) => t.stop());
+    } catch {}
+    startTransition(() => {
+      setShowCamera(false);
+      setCapturedImageSrc(null);
+      setCameraError(null);
+      setIsCameraActive(false);
+    });
+  }, []);
 
   // Add a small delay after camera becomes active to ensure it's fully ready
   useEffect(() => {
@@ -320,6 +330,16 @@ export default function BoaPage() {
       return () => clearTimeout(timer);
     }
   }, [isCameraActive, showCamera]);
+
+  // Ensure camera tracks stop on unmount
+  useEffect(() => {
+    return () => {
+      try {
+        const mediaStream = (webcamRef.current?.video?.srcObject as MediaStream | null);
+        mediaStream?.getTracks().forEach((t) => t.stop());
+      } catch {}
+    };
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-white flex items-center justify-center p-4">
@@ -450,11 +470,9 @@ export default function BoaPage() {
                       
                       <div className="w-full h-48 sm:h-64 bg-gray-200 rounded-lg overflow-hidden border border-gray-300 mb-4 relative">
                         {capturedImageSrc ? (
-                          <Image 
+                          <img 
                             src={capturedImageSrc} 
                             alt="Captured" 
-                            width={512}
-                            height={256}
                             className="w-full h-full object-cover"
                           />
                         ) : (

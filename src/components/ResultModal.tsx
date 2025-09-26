@@ -56,4 +56,4 @@ const ResultModal: React.FC<ResultModalProps> = ({ response, onClose, onRetry })
   );
 };
 
-export default ResultModal;
+export default React.memo(ResultModal);

@@ -10,7 +10,7 @@ interface SuccessModalProps {
 const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => {
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
       {/* Main Card - Responsive */}
       <div className="w-full max-w-[587px] h-auto min-h-[400px] sm:min-h-[621px] flex flex-col bg-white border border-[#E4E4E7] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-xl p-4 sm:p-6 gap-4 sm:gap-6">
         
@@ -110,6 +110,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ displayData, onClose }) => 
           <button
             onClick={onClose}
             className="w-full sm:w-[200px] h-10 flex flex-row justify-center items-center px-6 py-2 gap-2 bg-[#34C759] shadow-[0px_1px_3px_rgba(0,0,0,0.1),0px_1px_2px_rgba(0,0,0,0.06)] rounded-md font-['Inter'] font-medium text-sm leading-5 text-[#FAFAFA] hover:bg-[#2FB351] transition-colors"
+            aria-label="Close success modal"
           >
             Close
           </button>

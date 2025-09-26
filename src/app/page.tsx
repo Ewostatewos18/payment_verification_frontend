@@ -1,14 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const router = useRouter();
 
-  const handleBankSelect = (bankName: string) => {
-    router.push(`/${bankName.toLowerCase()}`);
-  };
+  // Proactively prefetch target routes to make navigation instant
+  useEffect(() => {
+    router.prefetch('/telebirr');
+    router.prefetch('/boa');
+    router.prefetch('/cbe');
+  }, [router]);
 
   return (
     <div className="min-h-screen w-full bg-white flex items-center justify-center p-4">
@@ -51,11 +55,13 @@ export default function Home() {
             <div className="w-full sm:w-48 h-24 sm:h-32 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: 'url(/logos/telebirr.png)' }}></div>
           </div>
           
-          {/* Clickable Overlay */}
-          <button
-            onClick={() => handleBankSelect('telebirr')}
+          {/* Clickable Overlay - use Link for instant client nav with prefetch */}
+          <Link
+            href="/telebirr"
+            prefetch
             className="absolute inset-0 w-full h-full bg-transparent"
-          ></button>
+            aria-label="Go to Telebirr verification"
+          />
         </div>
 
         {/* Bank of Abyssinia Card Section - Responsive */}
@@ -80,10 +86,12 @@ export default function Home() {
           </div>
           
           {/* Clickable Overlay */}
-          <button
-            onClick={() => handleBankSelect('boa')}
-            className="absolute inset-0 w-full h-full bg-transparent">
-            </button>
+          <Link
+            href="/boa"
+            prefetch
+            className="absolute inset-0 w-full h-full bg-transparent"
+            aria-label="Go to BOA verification"
+          />
         </div>
 
         {/* Commercial Bank of Ethiopia Card Section - Responsive */}
@@ -109,10 +117,12 @@ export default function Home() {
           </div>
           
           {/* Clickable Overlay */}
-          <button
-            onClick={() => handleBankSelect('cbe')}
+          <Link
+            href="/cbe"
+            prefetch
             className="absolute inset-0 w-full h-full bg-transparent"
-          ></button>
+            aria-label="Go to CBE verification"
+          />
         </div>
 
       </div>
